@@ -1,227 +1,93 @@
-/* =========================================================
-   script.js
-   - questions.json（配列形式）を読み込む
-   - 問題表示・選択肢判定
-   - Pyodideで「本物のPython」を実行
-   - 出力結果を画面に表示
-   ========================================================= */
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>勇者のPython修行｜チュートリアル</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 
-"use strict";
+<body class="stage-tutorial">
 
-/* ---------- 設定 ---------- */
-const DATA_URL = "./questions.json";
-const STORAGE_KEY = "python_master_progress_pyodide";
-const AUTO_NEXT_MS = 900;
+<header class="heroHeader">
+  <div class="heroHeader__inner">
+    <div>
+      <div class="badge stageBadge" id="stageBadge">ステージ</div>
+      <h1 class="title">勇者のPython修行</h1>
+    </div>
 
-/* ---------- DOM ---------- */
-const el = {
-  stageBadge: document.getElementById("stageBadge"),
-  levelText: document.getElementById("levelText"),
-  progressText: document.getElementById("progressText"),
+    <div class="heroBox">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat__k">レベル</div>
+          <div class="stat__v" id="levelText">Lv.1</div>
+        </div>
+        <div class="stat">
+          <div class="stat__k">進捗</div>
+          <div class="stat__v" id="progressText">0/0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 
-  talkImage: document.getElementById("talkImage"),
-  talkText: document.getElementById("talkText"),
+<main class="container">
 
-  qidPill: document.getElementById("qidPill"),
-  promptText: document.getElementById("promptText"),
-  pythonCode: document.getElementById("pythonCode"),
-  refCode: document.getElementById("refCode"),
+<section class="card">
+  <div class="card__head">
+    <h2 class="card__title">長老のことば</h2>
+  </div>
+  <div class="card__body talk">
+    <img id="talkImage" class="talk__img" alt="シーン画像">
+    <pre id="talkText" class="talk__text"></pre>
+  </div>
+</section>
 
-  choicesForm: document.getElementById("choicesForm"),
-  checkBtn: document.getElementById("checkBtn"),
+<section class="card">
+  <div class="card__head">
+    <h2 class="card__title">問題</h2>
+    <div class="pill" id="qidPill">Q-</div>
+  </div>
 
-  resultBox: document.getElementById("resultBox"),
-  resultMsg: document.getElementById("resultMsg"),
-  explainText: document.getElementById("explainText"),
-  autoNextText: document.getElementById("autoNextText"),
-};
+  <div class="card__body">
+    <p id="promptText" class="prompt"></p>
 
-/* ===== 実行ボタン・出力欄（JSで生成） ===== */
-const runBtn = document.createElement("button");
-runBtn.id = "runBtn";
-runBtn.className = "btn";
-runBtn.textContent = "▶ 実行";
+    <!-- ▼ コード表示（Python＋共通テスト） -->
+    <div class="codeGrid">
+      <div class="codeBox">
+        <div class="codeBox__title">Pythonコード（ここは編集できます）</div>
 
-const runOutput = document.createElement("pre");
-runOutput.id = "runOutput";
-runOutput.className = "code";
-runOutput.style.marginTop = "8px";
+        <!-- ★編集できるように textarea にする -->
+        <textarea id="pythonEditor" class="code" spellcheck="false"></textarea>
 
-/* Pythonコード欄の直後に挿入 */
-el.pythonCode.parentElement.appendChild(runBtn);
-el.pythonCode.parentElement.appendChild(runOutput);
+        <!-- ★実行ボタン＆出力欄 -->
+        <button id="runBtn" class="btn" type="button" style="margin:10px;">▶ 実行</button>
+        <pre id="runOutput" class="code" style="margin:0 10px 10px; background:#111827;"></pre>
+      </div>
 
-/* ---------- 状態 ---------- */
-let questions = [];
-let state = loadState();
+      <div class="codeBox">
+        <div class="codeBox__title">共通テスト用言語</div>
+        <pre id="refCode" class="code"></pre>
+      </div>
+    </div>
 
-/* ---------- ユーティリティ ---------- */
-function safeText(v) {
-  return v === null || v === undefined ? "" : String(v);
-}
+    <form id="choicesForm" class="choices__form"></form>
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { index: 0, level: 1, answered: {} };
-    const s = JSON.parse(raw);
-    return {
-      index: Number.isFinite(s.index) ? s.index : 0,
-      level: Number.isFinite(s.level) ? s.level : 1,
-      answered: s.answered && typeof s.answered === "object" ? s.answered : {},
-    };
-  } catch {
-    return { index: 0, level: 1, answered: {} };
-  }
-}
+    <button id="checkBtn" class="btn btn--primary" type="button" disabled>判定する</button>
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+    <div id="resultBox" class="result" hidden>
+      <p id="resultMsg" class="result__msg"></p>
+      <p id="explainText" class="result__explain"></p>
+      <p id="autoNextText" class="autoNext"></p>
+    </div>
+  </div>
+</section>
 
-function setBodyTheme(stageName) {
-  document.body.classList.remove("stage-default", "stage-tutorial");
-  if (safeText(stageName).includes("チュートリアル")) {
-    document.body.classList.add("stage-tutorial");
-  } else {
-    document.body.classList.add("stage-default");
-  }
-}
+</main>
 
-function hideResult() {
-  el.resultBox.hidden = true;
-  el.resultMsg.textContent = "";
-  el.explainText.textContent = "";
-  el.autoNextText.textContent = "";
-}
+<!-- ★Pyodideを先に読み込む -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
 
-/* ---------- Pyodide ---------- */
-let pyodide = null;
-
-async function initPyodide() {
-  pyodide = await loadPyodide();
-}
-
-async function runPython(code) {
-  try {
-    pyodide.runPython(`
-import sys
-from io import StringIO
-sys.stdout = StringIO()
-${code}
-output = sys.stdout.getvalue()
-`);
-    return pyodide.globals.get("output");
-  } catch (e) {
-    return e.toString();
-  }
-}
-
-/* ---------- 描画 ---------- */
-function renderChoices(q) {
-  el.choicesForm.innerHTML = "";
-  el.checkBtn.disabled = false;
-
-  const key = q.id;
-  const prev = state.answered[key];
-
-  q.choices.forEach((text, idx) => {
-    const label = document.createElement("label");
-    label.className = "choice";
-
-    const input = document.createElement("input");
-    input.type = "radio";
-    input.name = "choice";
-    input.value = idx;
-    if (prev === idx) input.checked = true;
-
-    const div = document.createElement("div");
-    div.className = "choice__text";
-    div.textContent = text;
-
-    label.appendChild(input);
-    label.appendChild(div);
-    el.choicesForm.appendChild(label);
-  });
-}
-
-function renderQuestion() {
-  const q = questions[state.index];
-  if (!q) return;
-
-  el.stageBadge.textContent = q.stageName;
-  el.levelText.textContent = `Lv.${state.level}`;
-  el.progressText.textContent = `${state.index + 1}/${questions.length}`;
-  setBodyTheme(q.stageName);
-
-  el.talkText.textContent = q.preTalk;
-  if (q.preImage) {
-    el.talkImage.src = q.preImage;
-    el.talkImage.hidden = false;
-  } else {
-    el.talkImage.hidden = true;
-  }
-
-  el.qidPill.textContent = `Q-${q.id}`;
-  el.promptText.textContent = q.prompt;
-  el.pythonCode.textContent = q.pythonCode;
-  el.refCode.textContent = q.refCode;
-
-  runOutput.textContent = "";
-
-  renderChoices(q);
-  hideResult();
-}
-
-/* ---------- 判定 ---------- */
-function getSelectedIndex() {
-  const c = el.choicesForm.querySelector("input[name='choice']:checked");
-  return c ? Number(c.value) : null;
-}
-
-function judge() {
-  const q = questions[state.index];
-  const selected = getSelectedIndex();
-  if (selected === null) return;
-
-  const ok = selected === q.answerIndex;
-  const first = state.answered[q.id] === undefined;
-  state.answered[q.id] = selected;
-
-  if (ok && first) {
-    state.level += q.levelAward || 1;
-  }
-
-  saveState();
-
-  el.resultBox.hidden = false;
-  el.resultMsg.textContent = ok ? "正解" : "不正解";
-  el.explainText.textContent = q.explain || "";
-
-  if (ok && state.index < questions.length - 1) {
-    el.autoNextText.textContent = "正解！次の問題へ進みます…";
-    setTimeout(() => {
-      state.index++;
-      renderQuestion();
-    }, AUTO_NEXT_MS);
-  }
-}
-
-/* ---------- 初期化 ---------- */
-async function init() {
-  await initPyodide();
-
-  const res = await fetch(DATA_URL);
-  questions = await res.json();
-
-  renderQuestion();
-
-  el.checkBtn.addEventListener("click", judge);
-
-  runBtn.addEventListener("click", async () => {
-    runOutput.textContent = "実行中...";
-    runOutput.textContent = await runPython(el.pythonCode.textContent);
-  });
-}
-
-init();
+<script src="script.js"></script>
+</body>
+</html>
