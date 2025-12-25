@@ -52,15 +52,12 @@
   <div class="card__body">
     <p id="promptText" class="prompt"></p>
 
-    <!-- ▼ コード表示（Python＋共通テスト） -->
     <div class="codeGrid">
       <div class="codeBox">
-        <div class="codeBox__title">Pythonコード（ここは編集できます）</div>
+        <div class="codeBox__title">Pythonコード（編集できます）</div>
 
-        <!-- ★編集できるように textarea にする -->
         <textarea id="pythonEditor" class="code" spellcheck="false"></textarea>
 
-        <!-- ★実行ボタン＆出力欄 -->
         <button id="runBtn" class="btn" type="button" style="margin:10px;">▶ 実行</button>
         <pre id="runOutput" class="code" style="margin:0 10px 10px; background:#111827;"></pre>
       </div>
@@ -73,7 +70,11 @@
 
     <form id="choicesForm" class="choices__form"></form>
 
-    <button id="checkBtn" class="btn btn--primary" type="button" disabled>判定する</button>
+    <!-- ★ 戻るボタンを追加 -->
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button id="backBtn" class="btn" type="button">← 前のステージに戻る</button>
+      <button id="checkBtn" class="btn btn--primary" type="button" disabled>判定する</button>
+    </div>
 
     <div id="resultBox" class="result" hidden>
       <p id="resultMsg" class="result__msg"></p>
@@ -85,9 +86,8 @@
 
 </main>
 
-<!-- ★Pyodideを先に読み込む -->
+<!-- Pyodide（script.jsより前） -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
-
 <script src="script.js"></script>
 </body>
 </html>
