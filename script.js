@@ -4,7 +4,7 @@
 const DATA_URL = "/Python_master.io/questions.json";
 const AUTO_NEXT_MS = 900;
 
-/* ===== DOM ===== */
+/* ===== DOM取得 ===== */
 const el = {
   stageBadge: document.getElementById("stageBadge"),
   levelText: document.getElementById("levelText"),
@@ -31,21 +31,29 @@ const el = {
   explainText: document.getElementById("explainText"),
   autoNextText: document.getElementById("autoNextText"),
 
-  levelUpAnim: document.getElementById("levelUpAnim"),
-  levelBefore: document.getElementById("levelBefore"),
-  levelAfter: document.getElementById("levelAfter"),
+  /* ★ ポップアップ用 */
+  popup: document.getElementById("popup"),
+  popupResult: document.getElementById("popupResult"),
+  popupBefore: document.getElementById("popupBefore"),
+  popupAfter: document.getElementById("popupAfter"),
 };
 
 /* ===== 状態 ===== */
 let questions = [];
-let state = { index: 0, level: 1 };
+let state = {
+  index: 0,
+  level: 1
+};
 
-/* ===== Pyodide ===== */
+/* ===== Pyodide（Python実行） ===== */
 let pyodideReady = null;
 
 async function runPython(code){
-  if(!pyodideReady) pyodideReady = loadPyodide();
+  if(!pyodideReady){
+    pyodideReady = loadPyodide();
+  }
   const py = await pyodideReady;
+
   try{
     py.runPython(`
 import sys
@@ -60,14 +68,14 @@ sys.stdout = StringIO()
   }
 }
 
-/* ===== 表示 ===== */
+/* ===== 表示処理 ===== */
 function renderQuestion(){
   const q = questions[state.index];
   if(!q) return;
 
   el.stageBadge.textContent = q.stageName;
   el.levelText.textContent = `Lv.${state.level}`;
-  el.progressText.textContent = `${state.index+1}/${questions.length}`;
+  el.progressText.textContent = `${state.index + 1}/${questions.length}`;
 
   el.talkText.textContent = q.preTalk || "";
   if(q.preImage){
@@ -84,7 +92,7 @@ function renderQuestion(){
   el.runOutput.textContent = "";
 
   el.choicesForm.innerHTML = "";
-  q.choices.forEach((c,i)=>{
+  q.choices.forEach((c, i) => {
     const label = document.createElement("label");
     label.className = "choice";
     label.innerHTML = `
@@ -95,16 +103,13 @@ function renderQuestion(){
   });
 
   el.resultBox.classList.add("hidden");
-  el.levelUpAnim.classList.add("hidden");
-  el.levelUpAnim.classList.remove("play");
-
   el.backBtn.disabled = (state.index === 0);
 }
 
-/* ===== 判定（★ここが肝） ===== */
+/* ===== 判定処理 ===== */
 function judge(){
   const q = questions[state.index];
-  const checked = el.choicesForm.querySelector("input:checked");
+  const checked = el.choicesForm.querySelector("input[name='choice']:checked");
   if(!checked) return;
 
   const beforeLv = state.level;
@@ -115,29 +120,28 @@ function judge(){
   el.explainText.textContent = q.explain || "";
   el.autoNextText.textContent = "";
 
-  /* ★ 演出を必ずリセット */
-  el.levelUpAnim.classList.add("hidden");
-  el.levelUpAnim.classList.remove("play");
-
   if(ok){
-    state.level += q.levelAward || 1;
+    const add = Number(q.levelAward) || 1;
+    state.level += add;
 
-    /* ヘッダのLv更新 */
+    /* ===== ヘッダ更新 ===== */
     el.levelText.textContent = `Lv.${state.level}`;
 
-    /* ★ Lv.X → Lv.Y 表示 */
-    el.levelBefore.textContent = `Lv.${beforeLv}`;
-    el.levelAfter.textContent  = `Lv.${state.level}`;
+    /* ===== ポップアップ表示 ===== */
+    el.popupResult.textContent = "正解！";
+    el.popupBefore.textContent = `Lv.${beforeLv}`;
+    el.popupAfter.textContent  = `Lv.${state.level}`;
 
-    el.levelUpAnim.classList.remove("hidden");
+    el.popup.classList.remove("hidden");
 
-    /* ★ 強制リフローでアニメ再発火 */
-    void el.levelUpAnim.offsetWidth;
-    el.levelUpAnim.classList.add("play");
+    /* 2秒後に消す */
+    setTimeout(() => {
+      el.popup.classList.add("hidden");
+    }, 2000);
 
+    /* 次の問題へ */
     if(state.index < questions.length - 1){
-      el.autoNextText.textContent = "次の問題へ進みます…";
-      setTimeout(()=>{
+      setTimeout(() => {
         state.index++;
         renderQuestion();
       }, AUTO_NEXT_MS);
@@ -154,14 +158,14 @@ async function init(){
 
   el.checkBtn.addEventListener("click", judge);
 
-  el.backBtn.addEventListener("click", ()=>{
+  el.backBtn.addEventListener("click", () => {
     if(state.index > 0){
       state.index--;
       renderQuestion();
     }
   });
 
-  el.runBtn.addEventListener("click", async ()=>{
+  el.runBtn.addEventListener("click", async () => {
     el.runOutput.textContent = "実行中...";
     el.runOutput.textContent = await runPython(el.pythonEditor.value);
   });
