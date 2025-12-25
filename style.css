@@ -376,3 +376,28 @@ body.stage-tutorial{
     grid-template-columns: 1fr;
   }
 }
+/* ===== Pythonコード編集欄（textarea）をコード表示と同じ見た目にする ===== */
+#pythonEditor{
+  width: calc(100% - 20px);
+  margin: 0 10px 10px;
+  padding: 10px;
+
+  background: transparent;       /* codeBox の暗い背景に合わせる */
+  color: #e7eefc;                /* 文字色（pre.code と同系統） */
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Source Han Code JP", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+
+  resize: vertical;
+  min-height: 180px;
+  outline: none;
+}
+
+/* ついでに：選択した文字が見やすいように */
+#pythonEditor::selection{
+  background: rgba(255,255,255,.18);
+}
