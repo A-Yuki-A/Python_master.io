@@ -12,7 +12,7 @@
 <header class="heroHeader">
   <div class="heroHeader__inner">
     <div>
-      <div class="badge" id="stageBadge">ステージ</div>
+      <div class="badge stageBadge" id="stageBadge">ステージ</div>
       <h1 class="title">勇者のPython修行</h1>
     </div>
 
@@ -51,7 +51,19 @@
 
   <div class="card__body">
     <p id="promptText" class="prompt"></p>
-    <pre id="pythonCode" class="code"></pre>
+
+    <!-- ▼ コード表示（Python＋共通テスト） -->
+    <div class="codeGrid">
+      <div class="codeBox">
+        <div class="codeBox__title">Pythonコード</div>
+        <pre id="pythonCode" class="code"></pre>
+      </div>
+
+      <div class="codeBox">
+        <div class="codeBox__title">共通テスト用言語</div>
+        <pre id="refCode" class="code"></pre>
+      </div>
+    </div>
 
     <form id="choicesForm" class="choices__form"></form>
 
