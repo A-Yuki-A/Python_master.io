@@ -1,99 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>勇者のPython修行</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="stage-default">
 
-  <!-- ===== TOP画面 ===== -->
-  <section id="topScreen" class="topScreen">
-    <div class="topCard">
-      <h1 class="topTitle">勇者のPython修行</h1>
+<section class="topScreen">
+  <div class="topCard">
+    <h1 class="topTitle">勇者のPython修行</h1>
 
-      <p class="topText">
-        進む勇気がある者は、ここから先へ。<br>
-        コードを読み解き、試練を突破せよ。
-      </p>
+    <p class="topText">
+      進む勇気がある者は、ここから先へ。<br>
+      コードを読み解き、試練を突破せよ。
+    </p>
 
-      <div class="learnBox">
-        <h2 class="learnBox__title">これから学ぶ内容</h2>
-        <ul id="learnList" class="learnBox__list"></ul>
-        <p id="learnNote" class="learnBox__note"></p>
-      </div>
-
-      <button id="startAdventureBtn" class="btn btn--primary bigBtn">
-        冒険を始める
-      </button>
+    <div class="learnBox">
+      <h2 class="learnBox__title">これから学ぶ内容</h2>
+      <ul id="learnList" class="learnBox__list"></ul>
+      <p id="learnNote" class="learnBox__note"></p>
     </div>
-  </section>
 
-  <!-- ===== ゲーム画面 ===== -->
-  <div id="gameScreen" class="hidden">
-
-    <header class="heroHeader">
-      <div class="heroHeader__inner">
-        <div>
-          <div class="badge" id="stageBadge">ステージ</div>
-          <h1 class="title">勇者のPython修行</h1>
-        </div>
-
-        <div class="heroBox">
-          <div class="stats">
-            <div class="stat">
-              <div class="stat__k">レベル</div>
-              <div class="stat__v" id="levelText">Lv.1</div>
-            </div>
-            <div class="stat">
-              <div class="stat__k">進捗</div>
-              <div class="stat__v" id="progressText">0/0</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <main class="container">
-
-      <section class="card">
-        <div class="card__head">
-          <h2 class="card__title">長老のことば</h2>
-        </div>
-        <div class="card__body talk">
-          <img id="talkImage" class="talk__img" alt="シーン画像">
-          <pre id="talkText" class="talk__text"></pre>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card__head">
-          <h2 class="card__title">問題</h2>
-          <div class="pill" id="qidPill">Q-</div>
-        </div>
-
-        <div class="card__body">
-          <p id="promptText"></p>
-
-          <pre id="pythonCode" class="code"></pre>
-
-          <form id="choicesForm"></form>
-
-          <button id="checkBtn" disabled>判定する</button>
-
-          <div id="resultBox" hidden>
-            <p id="resultMsg"></p>
-            <p id="explainText"></p>
-            <p id="autoNextText"></p>
-          </div>
-        </div>
-      </section>
-
-    </main>
+    <button id="startAdventureBtn" class="btn btn--primary bigBtn">
+      冒険を始める
+    </button>
   </div>
+</section>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
