@@ -38,7 +38,7 @@
     <h2 class="card__title">長老のことば</h2>
   </div>
   <div class="card__body talk">
-    <img id="talkImage" class="talk__img" alt="シーン画像">
+    <img id="talkImage" class="talk__img" alt="">
     <pre id="talkText" class="talk__text"></pre>
   </div>
 </section>
@@ -55,11 +55,10 @@
     <div class="codeGrid">
       <div class="codeBox">
         <div class="codeBox__title">Pythonコード（編集できます）</div>
-
         <textarea id="pythonEditor" class="code" spellcheck="false"></textarea>
 
         <button id="runBtn" class="btn" type="button" style="margin:10px;">▶ 実行</button>
-        <pre id="runOutput" class="code" style="margin:0 10px 10px; background:#111827;"></pre>
+        <pre id="runOutput" class="code" style="margin:0 10px 10px;"></pre>
       </div>
 
       <div class="codeBox">
@@ -70,7 +69,6 @@
 
     <form id="choicesForm" class="choices__form"></form>
 
-    <!-- ★ 戻るボタンを追加 -->
     <div style="display:flex; gap:10px; margin-top:10px;">
       <button id="backBtn" class="btn" type="button">← 前のステージに戻る</button>
       <button id="checkBtn" class="btn btn--primary" type="button" disabled>判定する</button>
@@ -78,6 +76,14 @@
 
     <div id="resultBox" class="result" hidden>
       <p id="resultMsg" class="result__msg"></p>
+
+      <!-- ★ レベルアップ演出 -->
+      <div id="levelUpAnim" class="levelUp hidden">
+        <span id="levelBefore"></span>
+        <span class="arrow">→</span>
+        <span id="levelAfter"></span>
+      </div>
+
       <p id="explainText" class="result__explain"></p>
       <p id="autoNextText" class="autoNext"></p>
     </div>
@@ -86,8 +92,8 @@
 
 </main>
 
-<!-- Pyodide（script.jsより前） -->
+<!-- Pyodide -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
-<script src="script.js"></script>
+<script src="script.js?v=1"></script>
 </body>
 </html>
