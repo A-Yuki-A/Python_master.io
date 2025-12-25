@@ -6,7 +6,7 @@
 const $ = (id) => document.getElementById(id);
 
 /* =====================================================
-   デフォルト学習内容（JSONが無い場合の保険）
+   デフォルト学習内容（questions.json が無い場合）
 ===================================================== */
 const DEFAULT_LEARN_TOPICS = [
   "rangeを使った繰り返し",
@@ -40,6 +40,17 @@ async function loadQuestions() {
     state.questions = [];
     state.learnTopics = [];
   }
+}
+
+/* =====================================================
+   値取得ヘルパ（キー名違い対応）
+===================================================== */
+function pick(obj, keys, fallback = "") {
+  for (const k of keys) {
+    const v = obj?.[k];
+    if (typeof v === "string" && v.trim() !== "") return v;
+  }
+  return fallback;
 }
 
 /* =====================================================
@@ -81,17 +92,66 @@ function renderQuestion() {
     return;
   }
 
-  /* --- 基本表示 --- */
-  if ($("qidPill")) $("qidPill").textContent = q.id || `Q${state.idx + 1}`;
-  if ($("promptText")) $("promptText").textContent = q.prompt || "";
+  /* --- デバッグ用（必要なければ削除OK） --- */
+  console.log("Question data:", q);
 
-  if ($("pythonCode")) $("pythonCode").textContent = q.python || "";
-  if ($("refCode")) $("refCode").textContent = q.ref || "";
+  /* --- 問題文・ID --- */
+  if ($("qidPill")) {
+    $("qidPill").textContent = pick(q, ["id", "qid"], `Q${state.idx + 1}`);
+  }
+  if ($("promptText")) {
+    $("promptText").textContent = pick(
+      q,
+      ["prompt", "question", "mondai"],
+      ""
+    );
+  }
 
-  if ($("talkText")) $("talkText").textContent = q.preTalk || "";
-  if ($("talkImage") && q.image) $("talkImage").src = q.image;
+  /* --- Pythonコード --- */
+  if ($("pythonCode")) {
+    $("pythonCode").textContent = pick(
+      q,
+      ["python", "pythonCode", "codePython"],
+      ""
+    );
+  }
 
-  /* --- 進捗・レベル --- */
+  /* --- 共通テスト用言語 --- */
+  if ($("refCode")) {
+    $("refCode").textContent = pick(
+      q,
+      ["ref", "refCode", "common", "commonTest", "commonTestCode"],
+      ""
+    );
+  }
+
+  /* --- 長老のことば --- */
+  if ($("talkText")) {
+    $("talkText").textContent = pick(
+      q,
+      ["preTalk", "talk", "serif"],
+      ""
+    );
+  }
+
+  /* --- 画像 --- */
+  const imgEl = $("talkImage");
+  if (imgEl) {
+    const imgPath = pick(
+      q,
+      ["image", "img", "imagePath", "talkImage"],
+      ""
+    );
+    if (imgPath) {
+      imgEl.src = imgPath;
+      imgEl.hidden = false;
+    } else {
+      imgEl.removeAttribute("src");
+      imgEl.hidden = true;
+    }
+  }
+
+  /* --- 進捗 --- */
   if ($("progressText")) {
     $("progressText").textContent =
       `${state.idx + 1}/${state.questions.length}`;
@@ -100,18 +160,20 @@ function renderQuestion() {
   /* --- 選択肢 --- */
   const form = $("choicesForm");
   const checkBtn = $("checkBtn");
+  const choices =
+    q.choices || q.options || q.sentakushi || [];
 
   if (form) {
     form.innerHTML = "";
 
-    (q.choices || []).forEach((text, i) => {
+    choices.forEach((text, i) => {
       const label = document.createElement("label");
       label.className = "choice";
       label.innerHTML = `
         <input type="radio" name="choice" value="${i}">
         <span class="choice__text"></span>
       `;
-      label.querySelector(".choice__text").textContent = text;
+      label.querySelector(".choice__text").textContent = String(text);
       form.appendChild(label);
     });
 
@@ -134,12 +196,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* --- JSON読み込み --- */
   await loadQuestions();
 
-  /* --- index.html（TOP） --- */
+  /* --- index.html --- */
   if ($("learnList")) {
     setTopLearnTopics();
   }
 
-  /* --- game.html（問題画面） --- */
+  /* --- game.html --- */
   if ($("promptText")) {
     renderQuestion();
   }
