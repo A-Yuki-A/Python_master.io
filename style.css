@@ -12,13 +12,55 @@
   --radius: 14px;
 }
 
+/* ===== ステージごとの背景（bodyにclassを付け替える） ===== */
 body{
   margin:0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Yu Gothic", "ヒラギノ角ゴ ProN", "Meiryo", sans-serif;
-  background: var(--bg);
   color: var(--text);
+  background: var(--bg);
 }
 
+/* デフォルト（不明なステージ） */
+body.stage-default{
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(31,122,224,.10), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(36,179,201,.10), transparent 55%),
+    var(--bg);
+}
+
+/* チュートリアル系 */
+body.stage-tutorial{
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(60, 180, 75, .14), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(31,122,224,.10), transparent 55%),
+    var(--bg);
+}
+
+/* 洞窟系 */
+body.stage-cave{
+  background:
+    radial-gradient(1200px 600px at 15% 0%, rgba(80, 80, 120, .18), transparent 62%),
+    radial-gradient(900px 500px at 85% 12%, rgba(30, 30, 60, .18), transparent 55%),
+    var(--bg);
+}
+
+/* 火山・高難度系 */
+body.stage-volcano{
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(217, 59, 59, .16), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(255, 170, 0, .12), transparent 55%),
+    var(--bg);
+}
+
+/* 氷・冷気系 */
+body.stage-ice{
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(120, 200, 255, .20), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(180, 220, 255, .14), transparent 55%),
+    var(--bg);
+}
+
+/* ===== ヘッダ ===== */
 .heroHeader{
   background: linear-gradient(135deg, var(--primary), var(--primary2));
   color:#fff;
@@ -52,12 +94,11 @@ body{
   border: 1px solid rgba(255,255,255,.26);
   border-radius: var(--radius);
   padding: 12px;
-  min-width: 340px;
+  min-width: 360px;
   backdrop-filter: blur(4px);
 }
 
 .label{ display:block; font-size: 12px; opacity:.95; margin-bottom: 6px; }
-
 .row{ display:flex; gap:8px; }
 
 .input{
@@ -84,6 +125,12 @@ body{
 .stat__k{ font-size: 11px; opacity: .9; }
 .stat__v{ font-size: 16px; font-weight: 800; margin-top: 2px; }
 
+.smallNote{
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: .92;
+}
+
 .progressWrap{
   max-width: 1100px;
   margin: 12px auto 0;
@@ -101,6 +148,7 @@ body{
   width: 0%;
 }
 
+/* ===== 本体 ===== */
 .container{
   max-width: 1100px;
   margin: 18px auto 24px;
@@ -117,6 +165,7 @@ body{
   box-shadow: var(--shadow);
   overflow: hidden;
 }
+
 .card__head{
   display:flex;
   align-items:center;
@@ -125,6 +174,7 @@ body{
   border-bottom: 1px solid var(--line);
 }
 .card__title{ margin:0; font-size: 16px; }
+
 .card__body{ padding: 14px; }
 
 .pill{
@@ -179,7 +229,6 @@ body{
   gap: 12px;
   margin-bottom: 12px;
 }
-
 .codeBox{
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -228,9 +277,7 @@ body{
   background: #fbfcff;
 }
 .choice input{ margin-top: 3px; }
-.choice__text{
-  white-space: pre-wrap;
-}
+.choice__text{ white-space: pre-wrap; }
 
 .actions{
   display:flex;
@@ -277,8 +324,25 @@ body{
   padding: 10px 12px;
   background: #fbfcff;
 }
-.result__msg{ margin: 0 0 6px; font-weight: 900; }
+.result__msg{ margin: 0 0 10px; font-weight: 900; }
 .result__explain{ margin: 0; white-space: pre-wrap; color: var(--muted); }
+
+.explainBlock{
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: #ffffff;
+}
+.explainBlock__title{
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.autoNext{
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
 
 .note{
   margin: 10px 0 0;
@@ -292,6 +356,7 @@ body{
   padding: 0 16px;
   color: var(--muted);
 }
+
 @media (max-width: 900px){
   .heroHeader__inner{ flex-direction: column; }
   .heroBox{ width: 100%; min-width: auto; }
