@@ -22,16 +22,22 @@ const state = {
   timer: null
 };
 
-function clearTimer() {
-  if (state.timer) {
-    clearTimeout(state.timer);
-    state.timer = null;
-  }
+async function loadQuestions() {
+  const res = await fetch("questions.json", { cache: "no-store" });
+  const json = await res.json();
+  state.questions = json.questions;
+  state.learnTopics = json.meta?.learnTopics || [];
 }
 
+/* ---------- TOP画面 ---------- */
 function setTopLearnTopics() {
-  const topics = state.learnTopics.length ? state.learnTopics : DEFAULT_LEARN_TOPICS;
   const ul = $("learnList");
+  if (!ul) return;
+
+  const topics = state.learnTopics.length
+    ? state.learnTopics
+    : DEFAULT_LEARN_TOPICS;
+
   ul.innerHTML = "";
   topics.forEach(t => {
     const li = document.createElement("li");
@@ -40,18 +46,17 @@ function setTopLearnTopics() {
   });
 
   $("learnNote").textContent =
-    state.learnTopics.length
-      ? "※ この一覧は questions.json の meta.learnTopics から自動表示しています。"
-      : "";
+    "※ この一覧は questions.json の meta.learnTopics から自動表示しています。";
 }
 
+/* ---------- ゲーム画面 ---------- */
 function updateStats() {
   $("levelText").textContent = `Lv.${state.level}`;
-  $("progressText").textContent = `${state.cleared.size}/${state.questions.length}`;
+  $("progressText").textContent =
+    `${state.cleared.size}/${state.questions.length}`;
 }
 
 function showQuestion() {
-  clearTimer();
   const q = state.questions[state.index];
   if (!q) return;
 
@@ -64,19 +69,28 @@ function showQuestion() {
 
   const form = $("choicesForm");
   form.innerHTML = "";
+
   q.choices.forEach((c, i) => {
     const label = document.createElement("label");
+    label.className = "choice";
+
     const input = document.createElement("input");
     input.type = "radio";
     input.name = "choice";
     input.value = i;
+
+    const span = document.createElement("span");
+    span.className = "choice__text";
+    span.textContent = c;
+
     label.appendChild(input);
-    label.append(c);
+    label.appendChild(span);
+
     label.onclick = () => {
       if (!state.judged) $("checkBtn").disabled = false;
     };
+
     form.appendChild(label);
-    form.appendChild(document.createElement("br"));
   });
 
   $("checkBtn").disabled = true;
@@ -102,7 +116,7 @@ function checkAnswer() {
     state.cleared.add(q.id);
     updateStats();
 
-    state.timer = setTimeout(() => {
+    setTimeout(() => {
       state.index++;
       if (state.index < state.questions.length) {
         showQuestion();
@@ -115,27 +129,20 @@ function checkAnswer() {
   state.judged = true;
 }
 
-function startAdventure() {
-  $("topScreen").classList.add("hidden");
-  $("gameScreen").classList.remove("hidden");
-  state.index = 0;
-  state.level = 1;
-  state.cleared.clear();
-  updateStats();
-  showQuestion();
-}
-
-async function loadQuestions() {
-  const res = await fetch("questions.json", { cache: "no-store" });
-  const json = await res.json();
-  state.questions = json.questions;
-  state.learnTopics = json.meta?.learnTopics || [];
-}
-
+/* ---------- 初期化 ---------- */
 document.addEventListener("DOMContentLoaded", async () => {
   await loadQuestions();
-  setTopLearnTopics();
 
-  $("startAdventureBtn").onclick = startAdventure;
-  $("checkBtn").onclick = checkAnswer;
+  if ($("learnList")) {
+    setTopLearnTopics();
+    $("startAdventureBtn").onclick = () => {
+      location.href = "game.html";
+    };
+  }
+
+  if ($("choicesForm")) {
+    updateStats();
+    showQuestion();
+    $("checkBtn").onclick = checkAnswer;
+  }
 });
