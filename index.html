@@ -12,7 +12,7 @@
       <div>
         <div class="badge" id="stageBadge">ステージ</div>
         <h1 class="title">勇者のPython修行</h1>
-        <p class="subtitle">問題を解いてレベルアップしよう</p>
+        <p class="subtitle">正解すると自動で次へ進みます</p>
       </div>
 
       <div class="heroBox">
@@ -21,6 +21,7 @@
           <input id="heroName" class="input" type="text" placeholder="例：アキヨシ" />
           <button id="startBtn" class="btn btn--primary">はじめる</button>
         </div>
+
         <div class="stats">
           <div class="stat">
             <div class="stat__k">レベル</div>
@@ -30,6 +31,10 @@
             <div class="stat__k">進捗</div>
             <div class="stat__v" id="progressText">-</div>
           </div>
+        </div>
+
+        <div class="smallNote">
+          正解1回につきレベル+5
         </div>
       </div>
     </div>
@@ -79,7 +84,6 @@
 
         <div class="actions">
           <button id="checkBtn" class="btn btn--primary" disabled>判定する</button>
-          <button id="nextBtn" class="btn" disabled>次の問題へ</button>
           <button id="resetBtn" class="btn btn--danger" disabled>進捗リセット</button>
         </div>
 
@@ -87,7 +91,13 @@
           <div class="result__head" id="resultHead">結果</div>
           <div class="result__body">
             <p id="resultMsg" class="result__msg"></p>
-            <p id="explainText" class="result__explain"></p>
+
+            <div class="explainBlock">
+              <div class="explainBlock__title">解説</div>
+              <p id="explainText" class="result__explain"></p>
+            </div>
+
+            <p class="autoNext" id="autoNextText"></p>
           </div>
         </div>
 
