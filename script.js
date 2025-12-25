@@ -2,7 +2,6 @@
 
 /* ===== 設定 ===== */
 const DATA_URL = "/Python_master.io/questions.json";
-const STORAGE_KEY = "python_master_progress_lv";
 const AUTO_NEXT_MS = 900;
 
 /* ===== DOM ===== */
@@ -39,35 +38,14 @@ const el = {
 
 /* ===== 状態 ===== */
 let questions = [];
-let state = loadState();
-
-/* ===== 状態管理 ===== */
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return { index:0, level:1, answered:{} };
-    return JSON.parse(raw);
-  }catch{
-    return { index:0, level:1, answered:{} };
-  }
-}
-
-function saveState(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+let state = { index: 0, level: 1 };
 
 /* ===== Pyodide ===== */
 let pyodideReady = null;
 
-async function getPyodide(){
-  if(!pyodideReady){
-    pyodideReady = loadPyodide();
-  }
-  return pyodideReady;
-}
-
 async function runPython(code){
-  const py = await getPyodide();
+  if(!pyodideReady) pyodideReady = loadPyodide();
+  const py = await pyodideReady;
   try{
     py.runPython(`
 import sys
@@ -116,40 +94,48 @@ function renderQuestion(){
     el.choicesForm.appendChild(label);
   });
 
-  el.checkBtn.disabled = false;
-  el.backBtn.disabled = (state.index === 0);
-  el.resultBox.hidden = true;
+  el.resultBox.classList.add("hidden");
   el.levelUpAnim.classList.add("hidden");
+  el.levelUpAnim.classList.remove("play");
+
+  el.backBtn.disabled = (state.index === 0);
 }
 
-/* ===== 判定 ===== */
+/* ===== 判定（★ここが肝） ===== */
 function judge(){
   const q = questions[state.index];
-  const sel = el.choicesForm.querySelector("input:checked");
-  if(!sel) return;
+  const checked = el.choicesForm.querySelector("input:checked");
+  if(!checked) return;
 
   const beforeLv = state.level;
-  const ok = Number(sel.value) === q.answerIndex;
+  const ok = Number(checked.value) === Number(q.answerIndex);
 
-  el.resultBox.hidden = false;
+  el.resultBox.classList.remove("hidden");
   el.resultMsg.textContent = ok ? "正解！" : "不正解";
   el.explainText.textContent = q.explain || "";
+  el.autoNextText.textContent = "";
+
+  /* ★ 演出を必ずリセット */
+  el.levelUpAnim.classList.add("hidden");
+  el.levelUpAnim.classList.remove("play");
 
   if(ok){
     state.level += q.levelAward || 1;
-    saveState();
 
-    if(state.level > beforeLv){
-      el.levelBefore.textContent = `Lv.${beforeLv}`;
-      el.levelAfter.textContent  = `Lv.${state.level}`;
-      el.levelUpAnim.classList.remove("hidden");
+    /* ヘッダのLv更新 */
+    el.levelText.textContent = `Lv.${state.level}`;
 
-      el.levelUpAnim.style.animation = "none";
-      el.levelUpAnim.offsetHeight;
-      el.levelUpAnim.style.animation = "";
-    }
+    /* ★ Lv.X → Lv.Y 表示 */
+    el.levelBefore.textContent = `Lv.${beforeLv}`;
+    el.levelAfter.textContent  = `Lv.${state.level}`;
 
-    if(state.index < questions.length-1){
+    el.levelUpAnim.classList.remove("hidden");
+
+    /* ★ 強制リフローでアニメ再発火 */
+    void el.levelUpAnim.offsetWidth;
+    el.levelUpAnim.classList.add("play");
+
+    if(state.index < questions.length - 1){
       el.autoNextText.textContent = "次の問題へ進みます…";
       setTimeout(()=>{
         state.index++;
@@ -167,8 +153,9 @@ async function init(){
   renderQuestion();
 
   el.checkBtn.addEventListener("click", judge);
+
   el.backBtn.addEventListener("click", ()=>{
-    if(state.index>0){
+    if(state.index > 0){
       state.index--;
       renderQuestion();
     }
