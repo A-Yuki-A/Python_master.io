@@ -1,366 +1,281 @@
-* { box-sizing: border-box; }
-:root{
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --text:#1f2430;
-  --muted:#5b6578;
-  --line:#e6e9f2;
-  --primary:#1f7ae0;
-  --primary2:#24b3c9;
-  --danger:#d93b3b;
-  --shadow: 0 8px 24px rgba(20, 30, 50, 0.10);
-  --radius: 14px;
+/* =========================
+   全体設定
+========================= */
+* {
+  box-sizing: border-box;
 }
 
-/* ===== ステージごとの背景（bodyにclassを付け替える） ===== */
-body{
-  margin:0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Yu Gothic", "ヒラギノ角ゴ ProN", "Meiryo", sans-serif;
-  color: var(--text);
-  background: var(--bg);
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Yu Gothic", "ヒラギノ角ゴ ProN", "Meiryo", sans-serif;
+  background: #f4f6fb;
+  color: #222;
 }
 
-/* デフォルト（不明なステージ） */
-body.stage-default{
-  background:
-    radial-gradient(1200px 600px at 10% 0%, rgba(31,122,224,.10), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(36,179,201,.10), transparent 55%),
-    var(--bg);
+/* 非表示 */
+.hidden {
+  display: none;
 }
 
-/* チュートリアル系 */
-body.stage-tutorial{
-  background:
-    radial-gradient(1200px 600px at 10% 0%, rgba(60, 180, 75, .14), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(31,122,224,.10), transparent 55%),
-    var(--bg);
+/* =========================
+   ステージ背景
+========================= */
+.stage-default {
+  background: #f4f6fb;
 }
 
-/* 洞窟系 */
-body.stage-cave{
-  background:
-    radial-gradient(1200px 600px at 15% 0%, rgba(80, 80, 120, .18), transparent 62%),
-    radial-gradient(900px 500px at 85% 12%, rgba(30, 30, 60, .18), transparent 55%),
-    var(--bg);
+.stage-tutorial {
+  background: linear-gradient(180deg, #cfe9d9, #f4f6fb);
 }
 
-/* 火山・高難度系 */
-body.stage-volcano{
-  background:
-    radial-gradient(1200px 600px at 10% 0%, rgba(217, 59, 59, .16), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(255, 170, 0, .12), transparent 55%),
-    var(--bg);
+.stage-cave {
+  background: linear-gradient(180deg, #d9d9d9, #f4f6fb);
 }
 
-/* 氷・冷気系 */
-body.stage-ice{
-  background:
-    radial-gradient(1200px 600px at 10% 0%, rgba(120, 200, 255, .20), transparent 60%),
-    radial-gradient(900px 500px at 90% 10%, rgba(180, 220, 255, .14), transparent 55%),
-    var(--bg);
+.stage-volcano {
+  background: linear-gradient(180deg, #ffd6d6, #f4f6fb);
 }
 
-/* ===== ヘッダ ===== */
-.heroHeader{
-  background: linear-gradient(135deg, var(--primary), var(--primary2));
-  color:#fff;
-  padding: 18px 16px 14px;
+.stage-ice {
+  background: linear-gradient(180deg, #dff3ff, #f4f6fb);
 }
 
-.heroHeader__inner{
-  max-width: 1100px;
-  margin: 0 auto;
-  display:flex;
-  gap:18px;
-  align-items:flex-start;
-  justify-content: space-between;
+/* =========================
+   TOP画面
+========================= */
+.topScreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.title{ margin: 6px 0 0; font-size: 26px; }
-.subtitle{ margin: 6px 0 0; opacity: .92; }
-
-.badge{
-  display:inline-block;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.20);
-  border: 1px solid rgba(255,255,255,.35);
-  font-weight: 700;
-  font-size: 12px;
+.topCard {
+  background: white;
+  width: 100%;
+  max-width: 640px;
+  padding: 32px 36px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  text-align: center;
 }
 
-.heroBox{
-  background: rgba(255,255,255,.16);
-  border: 1px solid rgba(255,255,255,.26);
-  border-radius: var(--radius);
-  padding: 12px;
-  min-width: 360px;
-  backdrop-filter: blur(4px);
+.topTitle {
+  margin: 0;
+  font-size: 2rem;
 }
 
-.label{ display:block; font-size: 12px; opacity:.95; margin-bottom: 6px; }
-.row{ display:flex; gap:8px; }
+.topText {
+  margin: 16px 0 24px;
+  line-height: 1.6;
+}
 
-.input{
-  flex:1;
-  padding: 10px 12px;
+/* =========================
+   学習内容ボックス
+========================= */
+.learnBox {
+  background: #f8fafc;
   border-radius: 10px;
-  border: none;
-  outline: none;
-  font-size: 14px;
+  padding: 18px 22px;
+  margin-bottom: 28px;
+  text-align: left;
 }
 
-.stats{
+.learnBox__title {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+}
+
+.learnBox__list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.learnBox__list li {
+  margin: 6px 0;
+}
+
+.learnBox__note {
   margin-top: 10px;
-  display:flex;
-  gap:10px;
-}
-.stat{
-  flex:1;
-  background: rgba(255,255,255,.14);
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 12px;
-  padding: 8px 10px;
-}
-.stat__k{ font-size: 12px; opacity: .9; }
-.stat__v{ font-size: 16px; font-weight: 800; margin-top: 2px; }
-
-.smallNote{
-  margin-top: 8px;
-  font-size: 12px;
-  opacity: .92;
+  font-size: 0.85rem;
+  color: #666;
 }
 
-.progressWrap{
-  max-width: 1100px;
-  margin: 12px auto 0;
-}
-.progressBar{
-  height: 10px;
-  background: rgba(255,255,255,.22);
+/* =========================
+   ボタン
+========================= */
+.btn {
+  border: none;
   border-radius: 999px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.25);
-}
-.progressBar__fill{
-  height: 100%;
-  background: rgba(255,255,255,.85);
-  width: 0%;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
-/* ===== 本体 ===== */
-.container{
-  max-width: 1100px;
-  margin: 18px auto 24px;
-  padding: 0 16px;
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+.btn--primary {
+  background: #1f7ae0;
+  color: white;
 }
 
-.card{
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
+.btn--primary:hover {
+  background: #1666c1;
 }
 
-.card__head{
-  display:flex;
-  align-items:center;
+.bigBtn {
+  font-size: 1.15rem;
+  padding: 14px 28px;
+}
+
+/* =========================
+   ヘッダー（ゲーム画面）
+========================= */
+.heroHeader {
+  background: white;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  padding: 16px 20px;
+}
+
+.heroHeader__inner {
+  max-width: 900px;
+  margin: auto;
+  display: flex;
   justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
+  align-items: center;
 }
-.card__title{ margin:0; font-size: 16px; }
 
-.card__body{ padding: 14px; }
-
-.pill{
-  font-weight: 800;
-  color: var(--primary);
-  background: #eaf3ff;
-  border: 1px solid #d3e7ff;
-  padding: 6px 10px;
+.badge {
+  display: inline-block;
+  background: #eef4ff;
+  color: #1f7ae0;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 0.85rem;
 }
 
-.talk{
-  display:grid;
-  grid-template-columns: 240px 1fr;
-  gap: 12px;
-  align-items:start;
-}
-.talk__img{
-  width:100%;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: #f1f4fb;
-  object-fit: cover;
-  max-height: 180px;
-}
-.talk__text{
-  margin:0;
-  white-space: pre-wrap;
-  line-height: 1.6;
-  color: var(--text);
-  background: #fbfcff;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px;
-  min-height: 180px;
-  font-size: 12px;
+.title {
+  margin: 6px 0 0;
+  font-size: 1.4rem;
 }
 
-.prompt{
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  background: #fbfcff;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  white-space: pre-wrap;
-  color: var(--text);
+/* =========================
+   ステータス
+========================= */
+.heroBox {
+  text-align: right;
 }
 
-.codeGrid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.codeBox{
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
-  background: #0f172a;
-}
-.codeBox__title{
-  background: rgba(255,255,255,.08);
-  color: rgba(255,255,255,.9);
-  padding: 8px 10px;
-  font-size: 12px;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-}
-.code{
-  margin:0;
-  padding: 10px;
-  color: #e7eefc;
-  white-space: pre-wrap;
-  line-height: 1.6;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Source Han Code JP", monospace;
-  font-size: 13px;
+.stats {
+  display: flex;
+  gap: 16px;
 }
 
-.choices{
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
-  background: #ffffff;
-}
-.choices__title{
-  font-weight: 800;
-  margin-bottom: 10px;
-}
-.choices__form{
-  display:grid;
-  gap: 8px;
-}
-.choice{
-  display:flex;
-  gap: 10px;
-  align-items:flex-start;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  cursor: pointer;
-  background: #fbfcff;
-}
-.choice input{ margin-top: 3px; }
-.choice__text{ white-space: pre-wrap; }
-
-.actions{
-  display:flex;
-  gap: 10px;
-  margin-top: 12px;
-  flex-wrap: wrap;
+.stat__k {
+  font-size: 0.75rem;
+  color: #666;
 }
 
-.btn{
-  border: 1px solid var(--line);
-  background: #ffffff;
-  color: var(--text);
-  padding: 10px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 800;
-}
-.btn:disabled{
-  opacity: .55;
-  cursor: not-allowed;
-}
-.btn--primary{
-  border: 1px solid rgba(255,255,255,.0);
-  background: linear-gradient(135deg, var(--primary), var(--primary2));
-  color: #fff;
-}
-.btn--danger{
-  border: 1px solid rgba(255,255,255,.0);
-  background: var(--danger);
-  color:#fff;
+.stat__v {
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
-.result{
-  margin-top: 12px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--line);
-}
-.result__head{
-  padding: 10px 12px;
-  font-weight: 900;
-}
-.result__body{
-  padding: 10px 12px;
-  background: #fbfcff;
-}
-.result__msg{ margin: 0 0 10px; font-weight: 900; }
-.result__explain{ margin: 0; white-space: pre-wrap; color: var(--muted); }
-
-.explainBlock{
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px;
-  background: #ffffff;
-}
-.explainBlock__title{
-  font-weight: 900;
-  margin-bottom: 6px;
-}
-
-.autoNext{
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.note{
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.footer{
-  max-width: 1100px;
-  margin: 0 auto 24px;
+/* =========================
+   メインコンテンツ
+========================= */
+.container {
+  max-width: 900px;
+  margin: 28px auto;
   padding: 0 16px;
-  color: var(--muted);
 }
 
-@media (max-width: 900px){
-  .heroHeader__inner{ flex-direction: column; }
-  .heroBox{ width: 100%; min-width: auto; }
-  .talk{ grid-template-columns: 1fr; }
-  .codeGrid{ grid-template-columns: 1fr; }
+.card {
+  background: white;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.card__head {
+  padding: 14px 18px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card__title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.card__body {
+  padding: 18px 22px;
+}
+
+/* =========================
+   長老のことば
+========================= */
+.talk {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.talk__img {
+  width: 140px;
+  border-radius: 10px;
+}
+
+.talk__text {
+  font-size: 12px;   /* ← 指定どおり12 */
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* =========================
+   問題・コード
+========================= */
+.code {
+  background: #f5f7fb;
+  border-radius: 8px;
+  padding: 14px;
+  font-family: "Source Han Code JP", monospace;
+  font-size: 0.95rem;
+  overflow-x: auto;
+}
+
+/* =========================
+   選択肢
+========================= */
+form label {
+  display: block;
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+/* =========================
+   判定結果
+========================= */
+#resultBox {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+#resultMsg {
+  font-weight: bold;
+}
+
+/* =========================
+   レスポンシブ
+========================= */
+@media (max-width: 600px) {
+  .talk {
+    flex-direction: column;
+  }
+  .talk__img {
+    width: 100%;
+  }
 }
