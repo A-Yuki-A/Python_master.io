@@ -1,58 +1,34 @@
-/* script.js
-  game.html で questions.json を読み込み、各UIに反映するためのコードです。
-  ※ game.html 側に、下の「ID一覧」の要素を用意してください（id 名はこのJSに合わせています）。
+/* script.js（questions.json が「配列」形式の版）
+  - 同階層の ./questions.json を fetch
+  - 1問ずつ表示
+  - 判定（answerIndex）
+  - 進捗・Lv（levelAward で加算）
+  - preImage を表示
 
-  【ID一覧（最低限）】
-  - stageName        : ステージ名表示（例：バッジ）
-  - title            : タイトル（例：# 勇者のPython修行）
-  - playerLevel      : レベル表示（例：Lv.1 の 1 の部分 or 全体でもOK）
-  - progressText     : 進捗表示（例：0/0）
-  - elderText        : 長老のことば
-  - qNo              : 問題番号表示（例：Q-）
-  - prompt           : 問題文
-  - codePython       : Pythonコード表示（pre/code）
-  - codePseudo       : 共通テスト用言語表示（pre/code）
-  - choicesForm      : 選択肢（radio）を入れる場所（form/div）
-  - judgeBtn         : 「判定する」ボタン
-  - resultArea       : 結果エリア（全体）
-  - resultMsg        : 正誤メッセージ
-  - resultExplain    : 解説表示
-  - nextBtn          : 次へボタン（任意）
-  - restartBtn       : 最初から（任意）
-  - learnTopicsList  : 学習内容（任意 / ul）
-
-  【questions.json 想定（ゆるく対応）】
-  - meta.learnTopics : ["...", "..."]
-  - questions        : 配列
-    - id
-    - stageName
-    - preTalk
-    - prompt / question / text / problem （どれか）
-    - python / pythonCode / codePython （どれか）
-    - pseudo / testLang / codePseudo   （どれか）
-    - choices : ["A ...", "B ..."] or [{key:"ア", text:"..."}, ...]
-    - answer  : 0-based index / "A" / "ア" / "Q01-A" 等もある程度吸収
-    - explain / explanation
+  【game.html 側のid（この名前で用意してください）】
+  stageName, playerLevel, progressText
+  elderText, elderImg
+  qNo, prompt, codePython, codePseudo
+  choicesForm, judgeBtn
+  resultArea, resultMsg, resultExplain
+  nextBtn, restartBtn
 */
 
 (() => {
   "use strict";
 
-  // ====== 設定 ======
   const DATA_URL = "./questions.json";
-  const STORAGE_KEY = "python_master_progress_v1";
+  const STORAGE_KEY = "python_master_progress_v2";
+  const AUTO_NEXT_MS = 700; // 正解時に自動で次へ（0なら無し）
 
-  // 自動で次へ進む（正解時）
-  const AUTO_NEXT_MS = 700; // 0にすると自動遷移しない
-
-  // ====== DOM取得 ======
   const el = {
     stageName: document.getElementById("stageName"),
-    title: document.getElementById("title"),
     playerLevel: document.getElementById("playerLevel"),
     progressText: document.getElementById("progressText"),
 
     elderText: document.getElementById("elderText"),
+    elderImg: document.getElementById("elderImg"), // <img id="elderImg">
+
     qNo: document.getElementById("qNo"),
     prompt: document.getElementById("prompt"),
     codePython: document.getElementById("codePython"),
@@ -67,143 +43,27 @@
 
     nextBtn: document.getElementById("nextBtn"),
     restartBtn: document.getElementById("restartBtn"),
-
-    learnTopicsList: document.getElementById("learnTopicsList"),
   };
 
-  // 必須要素チェック（足りないと動かないので早めに分かるように）
-  const required = [
-    "stageName",
-    "playerLevel",
-    "progressText",
-    "elderText",
-    "qNo",
-    "prompt",
-    "codePython",
-    "codePseudo",
-    "choicesForm",
-    "judgeBtn",
-    "resultArea",
-    "resultMsg",
-    "resultExplain",
-  ];
-  for (const k of required) {
-    if (!el[k]) {
-      console.error(`[script.js] #${k} が見つかりません。game.html に id="${k}" の要素を用意してください。`);
-    }
-  }
-
-  // ====== 状態 ======
-  let data = null;
   let questions = [];
   let state = loadState();
 
-  // ====== ユーティリティ ======
   function safeText(v) {
-    if (v === null || v === undefined) return "";
-    return String(v);
-  }
-
-  function pick(obj, keys, fallback = "") {
-    for (const k of keys) {
-      if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
-    }
-    return fallback;
-  }
-
-  function normalizeChoices(rawChoices) {
-    // rawChoices:
-    //  - ["...", "..."]
-    //  - [{key:"ア", text:"..."}, ...]
-    //  - [{label:"A", value:"...", text:"..."}, ...]
-    if (!rawChoices) return [];
-
-    if (Array.isArray(rawChoices)) {
-      if (rawChoices.length === 0) return [];
-      if (typeof rawChoices[0] === "string") {
-        return rawChoices.map((t, i) => ({ key: String(i), label: "", text: t }));
-      }
-      if (typeof rawChoices[0] === "object") {
-        return rawChoices.map((c, i) => {
-          const key = pick(c, ["key", "id", "value", "label"], String(i));
-          const label = pick(c, ["label", "key"], "");
-          const text = pick(c, ["text", "value", "body"], "");
-          return { key: String(key), label: safeText(label), text: safeText(text) };
-        });
-      }
-    }
-    return [];
-  }
-
-  function answerToIndex(q, choices) {
-    // answer を 0-based index に変換（できるだけ吸収）
-    const ans = pick(q, ["answer", "correct", "correctAnswer", "ans"], null);
-    if (ans === null || ans === undefined) return null;
-
-    // すでに数値（0-based/1-based両方をそれっぽく吸収）
-    if (typeof ans === "number" && Number.isFinite(ans)) {
-      if (ans >= 0 && ans < choices.length) return ans;        // 0-based
-      if (ans >= 1 && ans <= choices.length) return ans - 1;   // 1-based
-    }
-
-    const s = safeText(ans).trim();
-
-    // "A" "B" "C" 形式
-    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    if (s.length === 1 && alpha.includes(s.toUpperCase())) {
-      const idx = alpha.indexOf(s.toUpperCase());
-      if (idx >= 0 && idx < choices.length) return idx;
-    }
-
-    // "ア" "イ" "ウ" 形式（よくある）
-    const kana = ["ア","イ","ウ","エ","オ","カ","キ","ク","ケ","コ","サ","シ","ス","セ","ソ"];
-    if (kana.includes(s)) {
-      const idx = kana.indexOf(s);
-      if (idx >= 0 && idx < choices.length) return idx;
-    }
-
-    // "Q01-A" "Q01_ア" みたいなのが来た場合、末尾の記号を拾う
-    const tail = s.slice(-1);
-    if (alpha.includes(tail.toUpperCase())) {
-      const idx = alpha.indexOf(tail.toUpperCase());
-      if (idx >= 0 && idx < choices.length) return idx;
-    }
-    if (kana.includes(tail)) {
-      const idx = kana.indexOf(tail);
-      if (idx >= 0 && idx < choices.length) return idx;
-    }
-
-    // choices の key と一致する場合（object choices）
-    const idxByKey = choices.findIndex(c => safeText(c.key) === s);
-    if (idxByKey !== -1) return idxByKey;
-
-    return null;
-  }
-
-  function setBodyTheme(stageName) {
-    // ステージ名で背景テーマを切り替え（必要なら増やせます）
-    document.body.classList.remove("stage-default", "stage-tutorial");
-    if (safeText(stageName).includes("チュートリアル")) {
-      document.body.classList.add("stage-tutorial");
-    } else {
-      document.body.classList.add("stage-default");
-    }
+    return v === null || v === undefined ? "" : String(v);
   }
 
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        return { index: 0, correct: 0, answered: {} };
-      }
-      const parsed = JSON.parse(raw);
+      if (!raw) return { index: 0, level: 1, answered: {} };
+      const s = JSON.parse(raw);
       return {
-        index: Number.isFinite(parsed.index) ? parsed.index : 0,
-        correct: Number.isFinite(parsed.correct) ? parsed.correct : 0,
-        answered: parsed.answered && typeof parsed.answered === "object" ? parsed.answered : {},
+        index: Number.isFinite(s.index) ? s.index : 0,
+        level: Number.isFinite(s.level) ? s.level : 1,
+        answered: s.answered && typeof s.answered === "object" ? s.answered : {},
       };
     } catch {
-      return { index: 0, correct: 0, answered: {} };
+      return { index: 0, level: 1, answered: {} };
     }
   }
 
@@ -212,7 +72,7 @@
   }
 
   function resetState() {
-    state = { index: 0, correct: 0, answered: {} };
+    state = { index: 0, level: 1, answered: {} };
     saveState();
   }
 
@@ -221,41 +81,25 @@
     if (state.index >= questions.length) state.index = Math.max(0, questions.length - 1);
   }
 
-  function updateHeader(q) {
-    const stageName = pick(q, ["stageName", "stage", "stage_title"], "ステージ");
-    if (el.stageName) el.stageName.textContent = safeText(stageName);
-    setBodyTheme(stageName);
-
-    // レベル：正解数に応じてLvを上げる例（好きに変更OK）
-    const lv = Math.max(1, 1 + Math.floor(state.correct / 3));
-    if (el.playerLevel) el.playerLevel.textContent = `Lv.${lv}`;
-
-    if (el.progressText) el.progressText.textContent = `${Math.min(state.index + 1, questions.length)}/${questions.length}`;
+  function setBodyTheme(stageName) {
+    document.body.classList.remove("stage-default", "stage-tutorial");
+    if (safeText(stageName).includes("チュートリアル")) {
+      document.body.classList.add("stage-tutorial");
+    } else {
+      document.body.classList.add("stage-default");
+    }
   }
 
   function clearResult() {
-    if (!el.resultArea) return;
-    el.resultArea.classList.add("hidden");
+    el.resultArea?.classList.add("hidden");
     if (el.resultMsg) el.resultMsg.textContent = "";
     if (el.resultExplain) el.resultExplain.textContent = "";
   }
 
   function showResult(ok, explainText) {
-    if (!el.resultArea) return;
-    el.resultArea.classList.remove("hidden");
+    el.resultArea?.classList.remove("hidden");
     if (el.resultMsg) el.resultMsg.textContent = ok ? "正解" : "不正解";
     if (el.resultExplain) el.resultExplain.textContent = safeText(explainText || "");
-  }
-
-  function renderLearnTopics() {
-    if (!el.learnTopicsList) return;
-    const topics = (data && data.meta && Array.isArray(data.meta.learnTopics)) ? data.meta.learnTopics : [];
-    el.learnTopicsList.innerHTML = "";
-    for (const t of topics) {
-      const li = document.createElement("li");
-      li.textContent = safeText(t);
-      el.learnTopicsList.appendChild(li);
-    }
   }
 
   function renderQuestion() {
@@ -263,49 +107,52 @@
     const q = questions[state.index];
     if (!q) return;
 
-    updateHeader(q);
-    clearResult();
+    // ステージ・進捗
+    if (el.stageName) el.stageName.textContent = safeText(q.stageName || "");
+    if (el.playerLevel) el.playerLevel.textContent = `Lv.${state.level}`;
+    if (el.progressText) el.progressText.textContent = `${state.index + 1}/${questions.length}`;
 
-    // 長老
-    if (el.elderText) el.elderText.textContent = safeText(pick(q, ["preTalk", "elder", "talk", "intro"], ""));
+    setBodyTheme(q.stageName);
+
+    // 長老テキスト・画像
+    if (el.elderText) el.elderText.textContent = safeText(q.preTalk || "");
+    if (el.elderImg) {
+      if (q.preImage) {
+        el.elderImg.src = safeText(q.preImage);
+        el.elderImg.alt = "scene";
+        el.elderImg.classList.remove("hidden");
+      } else {
+        el.elderImg.classList.add("hidden");
+      }
+    }
 
     // 問題番号
-    if (el.qNo) {
-      const id = pick(q, ["id", "qid", "no"], "");
-      el.qNo.textContent = id ? `Q-${safeText(id)}` : `Q-${state.index + 1}`;
-    }
+    if (el.qNo) el.qNo.textContent = safeText(q.id ? `Q-${q.id}` : `Q-${state.index + 1}`);
 
     // 問題文
-    const promptText = pick(q, ["prompt", "question", "text", "problem", "body"], "");
-    if (el.prompt) el.prompt.textContent = safeText(promptText);
+    if (el.prompt) el.prompt.textContent = safeText(q.prompt || "");
 
     // コード
-    const py = pick(q, ["python", "pythonCode", "codePython", "code_py"], "");
-    const pseudo = pick(q, ["pseudo", "testLang", "codePseudo", "dncl", "code_test"], "");
-    if (el.codePython) el.codePython.textContent = safeText(py);
-    if (el.codePseudo) el.codePseudo.textContent = safeText(pseudo);
+    if (el.codePython) el.codePython.textContent = safeText(q.pythonCode || "");
+    if (el.codePseudo) el.codePseudo.textContent = safeText(q.refCode || "");
 
     // 選択肢
-    const choices = normalizeChoices(pick(q, ["choices", "options", "selects"], []));
     el.choicesForm.innerHTML = "";
-
-    // 選択肢がない問題もある（穴埋めや入力式など）想定：その場合はボタン無効
+    const choices = Array.isArray(q.choices) ? q.choices : [];
     if (!choices.length) {
+      el.judgeBtn.disabled = true;
       const p = document.createElement("p");
-      p.textContent = "（この問題は選択肢がありません。questions.json の choices を確認してください）";
+      p.textContent = "（choices がありません）";
       p.style.color = "#5b6578";
       el.choicesForm.appendChild(p);
-      el.judgeBtn.disabled = true;
       return;
     }
-
     el.judgeBtn.disabled = false;
 
-    // 既に回答済みなら復元
-    const answeredKey = safeText(pick(q, ["id"], `idx_${state.index}`));
+    const answeredKey = safeText(q.id || `idx_${state.index}`);
     const prev = state.answered[answeredKey];
 
-    choices.forEach((c, idx) => {
+    choices.forEach((text, idx) => {
       const label = document.createElement("label");
       label.className = "choice";
 
@@ -314,45 +161,32 @@
       input.name = "choice";
       input.value = String(idx);
 
-      const textWrap = document.createElement("div");
-      textWrap.className = "choice__text";
+      if (prev !== undefined && Number(prev) === idx) input.checked = true;
 
-      // 表示ラベル（ア/イ など）があるなら先頭に付ける
-      const head =
-        c.label && safeText(c.label).trim()
-          ? `${safeText(c.label).trim()} `
-          : "";
-
-      textWrap.textContent = head + safeText(c.text);
-
-      // 復元
-      if (prev !== undefined && prev !== null && Number(prev) === idx) input.checked = true;
+      const t = document.createElement("div");
+      t.className = "choice__text";
+      t.textContent = safeText(text);
 
       label.appendChild(input);
-      label.appendChild(textWrap);
+      label.appendChild(t);
       el.choicesForm.appendChild(label);
     });
 
-    // 次へボタンの表示（任意）
-    if (el.nextBtn) {
-      el.nextBtn.disabled = state.index >= questions.length - 1;
-    }
+    clearResult();
+
+    if (el.nextBtn) el.nextBtn.disabled = state.index >= questions.length - 1;
   }
 
   function getSelectedIndex() {
     const checked = el.choicesForm.querySelector('input[name="choice"]:checked');
     if (!checked) return null;
     const v = Number(checked.value);
-    if (!Number.isFinite(v)) return null;
-    return v;
+    return Number.isFinite(v) ? v : null;
   }
 
   function judge() {
     const q = questions[state.index];
     if (!q) return;
-
-    const choices = normalizeChoices(pick(q, ["choices", "options", "selects"], []));
-    const correctIndex = answerToIndex(q, choices);
 
     const selected = getSelectedIndex();
     if (selected === null) {
@@ -360,36 +194,30 @@
       return;
     }
 
-    // 記録（同じ問題で何度も correct++ しないように）
-    const answeredKey = safeText(pick(q, ["id"], `idx_${state.index}`));
+    const correctIndex = Number(q.answerIndex);
+    const ok = Number.isFinite(correctIndex) ? (selected === correctIndex) : false;
+
+    const answeredKey = safeText(q.id || `idx_${state.index}`);
     const firstTime = (state.answered[answeredKey] === undefined);
 
     state.answered[answeredKey] = selected;
 
-    const explain = pick(q, ["explain", "explanation", "commentary"], "");
-
-    // 正解データが無い場合でも、選んだ内容を出して止める
-    if (correctIndex === null) {
-      saveState();
-      showResult(true, explain || "（正解データが未設定のため、判定は行いませんでした）");
-      return;
+    // 初回正解ならレベル加算（levelAward）
+    if (ok && firstTime) {
+      const add = Number(q.levelAward);
+      if (Number.isFinite(add) && add > 0) state.level += add;
+      else state.level += 1; // levelAwardが無い時の保険
     }
 
-    const ok = selected === correctIndex;
-    if (ok && firstTime) state.correct += 1;
-
     saveState();
-    showResult(ok, explain);
+    showResult(ok, q.explain || "");
 
-    if (ok && AUTO_NEXT_MS > 0) {
-      // 最後の問題でなければ次へ
-      if (state.index < questions.length - 1) {
-        window.setTimeout(() => {
-          state.index += 1;
-          saveState();
-          renderQuestion();
-        }, AUTO_NEXT_MS);
-      }
+    if (ok && AUTO_NEXT_MS > 0 && state.index < questions.length - 1) {
+      window.setTimeout(() => {
+        state.index += 1;
+        saveState();
+        renderQuestion();
+      }, AUTO_NEXT_MS);
     }
   }
 
@@ -401,55 +229,45 @@
     }
   }
 
-  function prev() {
-    if (state.index > 0) {
-      state.index -= 1;
-      saveState();
-      renderQuestion();
-    }
-  }
-
-  // ====== 初期化 ======
   async function init() {
     try {
       const res = await fetch(DATA_URL, { cache: "no-store" });
       if (!res.ok) throw new Error(`questions.json の読み込みに失敗しました (${res.status})`);
-      data = await res.json();
 
-      questions = Array.isArray(data.questions) ? data.questions : [];
-      if (!questions.length) throw new Error("questions.json に questions 配列が見つかりません。");
+      const json = await res.json();
 
-      renderLearnTopics();
+      // ★ここが重要：配列形式かどうか
+      if (!Array.isArray(json)) {
+        throw new Error("questions.json が配列形式ではありません。先頭が [ から始まっているか確認してください。");
+      }
+
+      questions = json;
+
+      if (!questions.length) throw new Error("questions.json の配列が空です。");
+
       renderQuestion();
 
-      // イベント
       el.judgeBtn?.addEventListener("click", judge);
-
-      // Enterで判定（ラジオ選択後に便利）
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          // 入力欄がある場合の誤爆を避けたいなら追加条件を入れる
-          judge();
-        }
-        if (e.key === "ArrowRight") next();
-        if (e.key === "ArrowLeft") prev();
-      });
-
       el.nextBtn?.addEventListener("click", next);
-
       el.restartBtn?.addEventListener("click", () => {
         resetState();
         renderQuestion();
       });
 
+      // Enterで判定
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") judge();
+        if (e.key === "ArrowRight") next();
+      });
+
     } catch (err) {
       console.error(err);
-      // 画面に出す（最低限）
-      if (el.resultArea) {
-        el.resultArea.classList.remove("hidden");
-        if (el.resultMsg) el.resultMsg.textContent = "エラー";
-        if (el.resultExplain) el.resultExplain.textContent =
-          safeText(err?.message || err) + "\n\n・game.html と questions.json が同じ階層にあるか\n・GitHub Pages で questions.json が公開されているか\nを確認してください。";
+      el.resultArea?.classList.remove("hidden");
+      if (el.resultMsg) el.resultMsg.textContent = "エラー";
+      if (el.resultExplain) {
+        el.resultExplain.textContent =
+          safeText(err?.message || err) +
+          "\n\n・game.html と questions.json が同じ階層か\n・GitHub Pages で questions.json が公開されているか\n・JSONの先頭が [ から始まっているか\nを確認してください。";
       }
     }
   }
