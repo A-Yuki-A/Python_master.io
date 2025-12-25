@@ -127,7 +127,7 @@ function updateStats() {
   const total = state.questions.length || 0;
   const clearedCount = state.cleared.size;
 
-  $("heroText").textContent = state.heroName ? state.heroName : "-";
+  $("heroText").textContent = "勇者";;
   $("levelText").textContent = state.heroName ? `Lv.${state.level}` : "Lv.1";
   $("progressText").textContent = `${clearedCount}/${total}`;
 
