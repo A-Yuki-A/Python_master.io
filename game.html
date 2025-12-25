@@ -32,21 +32,11 @@
 </header>
 
 <main class="container">
-<!-- ★ 正解＆レベルアップ ポップアップ -->
-<div id="popup" class="popup hidden">
-  <div class="popup__card">
-    <div id="popupResult" class="popup__result">正解！</div>
-    <div class="popup__level">
-      <span id="popupBefore">Lv.1</span>
-      <span class="arrow">→</span>
-      <span id="popupAfter">Lv.2</span>
-    </div>
-  </div>
-</div>
 
 <section class="card">
   <div class="card__head">
-    <h2 class="card__title">長老のことば</h2>
+    <!-- ★ 変更：長老のことば → ストーリー -->
+    <h2 class="card__title">ストーリー</h2>
   </div>
   <div class="card__body talk">
     <img id="talkImage" class="talk__img" alt="">
@@ -87,23 +77,27 @@
 
     <div id="resultBox" class="result hidden">
       <p id="resultMsg" class="result__msg"></p>
-
-      <!-- ★ レベルアップ演出DOM -->
-      <div id="levelUpAnim" class="levelUp hidden">
-        <span id="levelBefore"></span>
-        <span class="arrow">→</span>
-        <span id="levelAfter"></span>
-      </div>
-
       <p id="explainText" class="result__explain"></p>
       <p id="autoNextText" class="autoNext"></p>
     </div>
   </div>
 </section>
 
+<!-- ★ 正解＆レベルアップ ポップアップ -->
+<div id="popup" class="popup hidden">
+  <div class="popup__card">
+    <div id="popupResult" class="popup__result">正解！</div>
+    <div class="popup__level">
+      <span id="popupBefore">Lv.1</span>
+      <span class="arrow">→</span>
+      <span id="popupAfter">Lv.2</span>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
-<script src="script.js?v=FINAL"></script>
+<script src="script.js?v=FIX13"></script>
 </body>
 </html>
