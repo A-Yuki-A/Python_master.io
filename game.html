@@ -55,8 +55,14 @@
     <!-- ▼ コード表示（Python＋共通テスト） -->
     <div class="codeGrid">
       <div class="codeBox">
-        <div class="codeBox__title">Pythonコード</div>
-        <pre id="pythonCode" class="code"></pre>
+        <div class="codeBox__title">Pythonコード（ここは編集できます）</div>
+
+        <!-- ★編集できるように textarea にする -->
+        <textarea id="pythonEditor" class="code" spellcheck="false"></textarea>
+
+        <!-- ★実行ボタン＆出力欄 -->
+        <button id="runBtn" class="btn" type="button" style="margin:10px;">▶ 実行</button>
+        <pre id="runOutput" class="code" style="margin:0 10px 10px; background:#111827;"></pre>
       </div>
 
       <div class="codeBox">
@@ -67,7 +73,7 @@
 
     <form id="choicesForm" class="choices__form"></form>
 
-    <button id="checkBtn" class="btn btn--primary" disabled>判定する</button>
+    <button id="checkBtn" class="btn btn--primary" type="button" disabled>判定する</button>
 
     <div id="resultBox" class="result" hidden>
       <p id="resultMsg" class="result__msg"></p>
@@ -78,6 +84,9 @@
 </section>
 
 </main>
+
+<!-- ★Pyodideを先に読み込む -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
 
 <script src="script.js"></script>
 </body>
