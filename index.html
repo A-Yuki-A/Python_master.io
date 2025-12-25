@@ -6,110 +6,102 @@
   <title>勇者のPython修行</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <header class="heroHeader">
-    <div class="heroHeader__inner">
-      <div>
-        <div class="badge" id="stageBadge">ステージ</div>
-        <h1 class="title">勇者のPython修行</h1>
-        <p class="subtitle">正解すると自動で次へ進みます</p>
-      </div>
+<body class="stage-default">
 
-      <div class="heroBox">
-        <label class="label">勇者の名前（毎回入力）</label>
-        <div class="row">
-          <input id="heroName" class="input" type="text" placeholder="例：アキヨシ" />
-          <button id="startBtn" class="btn btn--primary">はじめる</button>
+<!-- ===== トップ画面 ===== -->
+<section id="topScreen" class="topScreen">
+  <div class="topCard">
+    <h1 class="topTitle">勇者のPython修行</h1>
+    <p class="topText">
+      ここは、論理とコードで世界を切り開く者だけが進める場所。<br>
+      Pythonの力を身につけ、数々の試練を乗り越えよ。
+    </p>
+
+    <label class="label">勇者の名前</label>
+    <input id="heroName" class="input" type="text" placeholder="例：アキヨシ">
+
+    <button id="startAdventureBtn" class="btn btn--primary bigBtn">
+      冒険を始める
+    </button>
+
+    <p class="smallNote">
+      ※ 正解すると自動で次の問題へ進みます
+    </p>
+  </div>
+</section>
+
+<!-- ===== ゲーム画面 ===== -->
+<div id="gameScreen" class="hidden">
+
+<header class="heroHeader">
+  <div class="heroHeader__inner">
+    <div>
+      <div class="badge" id="stageBadge">ステージ</div>
+      <h1 class="title">勇者のPython修行</h1>
+      <p class="subtitle">正解すると自動で次へ進みます</p>
+    </div>
+
+    <div class="heroBox">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat__k">レベル</div>
+          <div class="stat__v" id="levelText">Lv.1</div>
         </div>
-
-        <div class="stats">
-          <div class="stat">
-            <div class="stat__k">レベル</div>
-            <div class="stat__v" id="levelText">-</div>
-          </div>
-          <div class="stat">
-            <div class="stat__k">進捗</div>
-            <div class="stat__v" id="progressText">-</div>
-          </div>
-        </div>
-
-        <div class="smallNote">
-          正解1回につきレベル+5
+        <div class="stat">
+          <div class="stat__k">進捗</div>
+          <div class="stat__v" id="progressText">0/0</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="progressWrap">
-      <div class="progressBar" aria-label="進捗バー">
-        <div class="progressBar__fill" id="progressFill" style="width:0%"></div>
+  <div class="progressWrap">
+    <div class="progressBar">
+      <div class="progressBar__fill" id="progressFill"></div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <div class="card__head">
+      <h2 class="card__title">長老のことば</h2>
+    </div>
+    <div class="card__body talk">
+      <img id="talkImage" class="talk__img">
+      <pre id="talkText" class="talk__text"></pre>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card__head">
+      <h2 class="card__title">問題</h2>
+      <div class="pill" id="qidPill">Q01</div>
+    </div>
+
+    <div class="card__body">
+      <p id="promptText" class="prompt"></p>
+
+      <div class="codeGrid">
+        <pre id="pythonCode" class="code"></pre>
+        <pre id="refCode" class="code"></pre>
+      </div>
+
+      <form id="choicesForm" class="choices__form"></form>
+
+      <button id="checkBtn" class="btn btn--primary">判定する</button>
+
+      <div id="resultBox" class="result hidden">
+        <p id="resultMsg"></p>
+        <p id="explainText"></p>
       </div>
     </div>
-  </header>
+  </section>
 
-  <main class="container">
-    <section class="card" id="talkCard">
-      <div class="card__head">
-        <h2 class="card__title">長老のことば</h2>
-      </div>
-      <div class="card__body talk">
-        <img id="talkImage" class="talk__img" alt="シーン画像" />
-        <pre id="talkText" class="talk__text"></pre>
-      </div>
-    </section>
+</main>
+</div>
 
-    <section class="card" id="quizCard">
-      <div class="card__head">
-        <h2 class="card__title">問題</h2>
-        <div class="pill" id="qidPill">Q-</div>
-      </div>
-
-      <div class="card__body">
-        <p id="promptText" class="prompt"></p>
-
-        <div class="codeGrid">
-          <div class="codeBox">
-            <div class="codeBox__title">Pythonコード</div>
-            <pre id="pythonCode" class="code"></pre>
-          </div>
-          <div class="codeBox">
-            <div class="codeBox__title">共通テスト言語（参照）</div>
-            <pre id="refCode" class="code"></pre>
-          </div>
-        </div>
-
-        <div class="choices">
-          <div class="choices__title">【　】に当てはまるものを選びなさい</div>
-          <form id="choicesForm" class="choices__form"></form>
-        </div>
-
-        <div class="actions">
-          <button id="checkBtn" class="btn btn--primary" disabled>判定する</button>
-          <button id="resetBtn" class="btn btn--danger" disabled>進捗リセット</button>
-        </div>
-
-        <div id="resultBox" class="result" hidden>
-          <div class="result__head" id="resultHead">結果</div>
-          <div class="result__body">
-            <p id="resultMsg" class="result__msg"></p>
-
-            <div class="explainBlock">
-              <div class="explainBlock__title">解説</div>
-              <p id="explainText" class="result__explain"></p>
-            </div>
-
-            <p class="autoNext" id="autoNextText"></p>
-          </div>
-        </div>
-
-        <p class="note" id="statusNote"></p>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <small>GitHub Pages で動作します（データ：questions.json）</small>
-  </footer>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
