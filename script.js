@@ -29,7 +29,7 @@ const STAGE_THEME_RULES = [
 ];
 
 const state = {
-  heroName: "アルテミス",
+  heroName: "勇者",          // TOPで名前入力はしないので固定
   questions: [],
   learnTopics: [],
   index: 0,
@@ -39,29 +39,28 @@ const state = {
   autoNextTimer: null,
 };
 
-function storageKey(heroName) {
-  return `pyquest_progress_v3_${heroName}`;
+function storageKey() {
+  // 名前固定なので固定キーでOK
+  return `pyquest_progress_v3_fixedhero`;
 }
 
-function loadProgress(heroName) {
-  const raw = localStorage.getItem(storageKey(heroName));
+function loadProgress() {
+  const raw = localStorage.getItem(storageKey());
   if (!raw) return null;
   try { return JSON.parse(raw); } catch { return null; }
 }
 
 function saveProgress() {
-  if (!state.heroName) return;
   const data = {
     index: state.index,
     clearedIds: Array.from(state.cleared),
     level: state.level
   };
-  localStorage.setItem(storageKey(state.heroName), JSON.stringify(data));
+  localStorage.setItem(storageKey(), JSON.stringify(data));
 }
 
 function resetProgress() {
-  if (!state.heroName) return;
-  localStorage.removeItem(storageKey(state.heroName));
+  localStorage.removeItem(storageKey());
 }
 
 function clearAutoNextTimer() {
@@ -72,7 +71,8 @@ function clearAutoNextTimer() {
 }
 
 function setStatus(msg) {
-  $("statusNote").textContent = msg || "";
+  const el = $("statusNote");
+  if (el) el.textContent = msg || "";
 }
 
 function setBodyTheme(stageName) {
@@ -92,6 +92,7 @@ function setBodyTheme(stageName) {
 }
 
 function renderLearnList(listEl, topics) {
+  if (!listEl) return;
   listEl.innerHTML = "";
   topics.forEach(t => {
     const li = document.createElement("li");
@@ -112,7 +113,8 @@ function setTopLearnTopics() {
     ? "※ この一覧は questions.json の meta.learnTopics から自動表示しています。"
     : "※ meta.learnTopics が未設定のため、デフォルト表示です。";
 
-  $("learnNote").textContent = note;
+  const noteEl = $("learnNote");
+  if (noteEl) noteEl.textContent = note;
 }
 
 function setEndLearnTopics() {
@@ -127,23 +129,35 @@ function updateStats() {
   const total = state.questions.length || 0;
   const clearedCount = state.cleared.size;
 
-  $("heroText").textContent = "勇者";;
-  $("levelText").textContent = state.heroName ? `Lv.${state.level}` : "Lv.1";
-  $("progressText").textContent = `${clearedCount}/${total}`;
+  const heroEl = $("heroText");
+  if (heroEl) heroEl.textContent = state.heroName;
 
+  const levelEl = $("levelText");
+  if (levelEl) levelEl.textContent = `Lv.${state.level}`;
+
+  const progEl = $("progressText");
+  if (progEl) progEl.textContent = `${clearedCount}/${total}`;
+
+  const fill = $("progressFill");
   const pct = total ? Math.round((clearedCount / total) * 100) : 0;
-  $("progressFill").style.width = `${pct}%`;
+  if (fill) fill.style.width = `${pct}%`;
 }
 
 function updateHeader(q) {
-  $("stageBadge").textContent = q?.stageName ? `ステージ：${q.stageName}` : "ステージ";
-  $("qidPill").textContent = q?.id ? q.id : "Q-";
+  const badge = $("stageBadge");
+  if (badge) badge.textContent = q?.stageName ? `ステージ：${q.stageName}` : "ステージ";
+
+  const pill = $("qidPill");
+  if (pill) pill.textContent = q?.id ? q.id : "Q-";
 }
 
 function renderTalk(q) {
-  $("talkText").textContent = q.preTalk || "";
+  const talk = $("talkText");
+  if (talk) talk.textContent = q.preTalk || "";
 
   const img = $("talkImage");
+  if (!img) return;
+
   if (q.preImage && String(q.preImage).trim()) {
     img.src = q.preImage;
     img.style.display = "block";
@@ -154,34 +168,56 @@ function renderTalk(q) {
 }
 
 function renderProblem(q) {
-  $("promptText").textContent = q.prompt || "";
-  $("pythonCode").textContent = q.pythonCode || "";
-  $("refCode").textContent = q.refCode || "";
+  const p = $("promptText");
+  if (p) p.textContent = q.prompt || "";
+
+  const py = $("pythonCode");
+  if (py) py.textContent = q.pythonCode || "";
+
+  const ref = $("refCode");
+  if (ref) ref.textContent = q.refCode || "";
 }
 
 function hideResult() {
-  $("resultBox").hidden = true;
-  $("resultMsg").textContent = "";
-  $("explainText").textContent = "";
-  $("autoNextText").textContent = "";
+  const box = $("resultBox");
+  if (box) box.hidden = true;
+
+  const msg = $("resultMsg");
+  if (msg) msg.textContent = "";
+
+  const exp = $("explainText");
+  if (exp) exp.textContent = "";
+
+  const auto = $("autoNextText");
+  if (auto) auto.textContent = "";
 }
 
 function setResult({ ok, msg, explain, autoNextText }) {
-  $("resultBox").hidden = false;
-  $("resultHead").textContent = ok ? "正解！" : "不正解…";
-  $("resultHead").style.background = ok ? "#e8fff1" : "#fff0f0";
+  const box = $("resultBox");
+  if (box) box.hidden = false;
 
-  $("resultMsg").textContent = msg;
+  const head = $("resultHead");
+  if (head) {
+    head.textContent = ok ? "正解！" : "不正解…";
+    head.style.background = ok ? "#e8fff1" : "#fff0f0";
+  }
+
+  const msgEl = $("resultMsg");
+  if (msgEl) msgEl.textContent = msg;
 
   // 解説は必ず表示（空なら準備中）
-  const exp = (explain && String(explain).trim()) ? explain : "（解説は準備中です）";
-  $("explainText").textContent = exp;
+  const expText = (explain && String(explain).trim()) ? explain : "（解説は準備中です）";
+  const expEl = $("explainText");
+  if (expEl) expEl.textContent = expText;
 
-  $("autoNextText").textContent = autoNextText || "";
+  const autoEl = $("autoNextText");
+  if (autoEl) autoEl.textContent = autoNextText || "";
 }
 
 function renderChoices(q) {
   const form = $("choicesForm");
+  if (!form) return;
+
   form.innerHTML = "";
 
   const name = "choice";
@@ -206,7 +242,10 @@ function renderChoices(q) {
     label.addEventListener("click", () => {
       if (state.judged) return;
       input.checked = true;
-      $("checkBtn").disabled = false;
+
+      const checkBtn = $("checkBtn");
+      if (checkBtn) checkBtn.disabled = false;
+
       hideResult();
       setStatus("");
     });
@@ -214,7 +253,8 @@ function renderChoices(q) {
     form.appendChild(label);
   });
 
-  $("checkBtn").disabled = true;
+  const checkBtn = $("checkBtn");
+  if (checkBtn) checkBtn.disabled = true;
 }
 
 function getSelectedIndex() {
@@ -232,7 +272,10 @@ function showQuestion() {
   clearAutoNextTimer();
 
   const q = state.questions[state.index];
-  if (!q) return;
+  if (!q) {
+    setStatus("問題データがありません（questions.json を確認してください）。");
+    return;
+  }
 
   state.judged = false;
 
@@ -245,7 +288,8 @@ function showQuestion() {
   renderChoices(q);
   hideResult();
 
-  $("resetBtn").disabled = false;
+  const resetBtn = $("resetBtn");
+  if (resetBtn) resetBtn.disabled = false;
 
   setStatus("選択肢を選んで「判定する」を押してください。");
 }
@@ -263,7 +307,10 @@ function applyCorrect(q) {
 
 function lockAfterJudge() {
   state.judged = true;
-  $("checkBtn").disabled = true;
+
+  const checkBtn = $("checkBtn");
+  if (checkBtn) checkBtn.disabled = true;
+
   document.querySelectorAll('input[name="choice"]').forEach(el => el.disabled = true);
 }
 
@@ -273,15 +320,19 @@ function unlockForRetry() {
 }
 
 function goEnding() {
-  // エンディングに到達レベルを表示
-  $("endHero").textContent = state.heroName;
-  $("endLevel").textContent = `Lv.${state.level}`;
-  $("endCorrect").textContent = `${state.cleared.size}/${state.questions.length}`;
+  const endHero = $("endHero");
+  if (endHero) endHero.textContent = state.heroName;
+
+  const endLevel = $("endLevel");
+  if (endLevel) endLevel.textContent = `Lv.${state.level}`;
+
+  const endCorrect = $("endCorrect");
+  if (endCorrect) endCorrect.textContent = `${state.cleared.size}/${state.questions.length}`;
 
   setEndLearnTopics();
 
-  $("gameScreen").classList.add("hidden");
-  $("endingScreen").classList.remove("hidden");
+  $("gameScreen")?.classList.add("hidden");
+  $("endingScreen")?.classList.remove("hidden");
 }
 
 function nextQuestion() {
@@ -312,7 +363,6 @@ function checkAnswer() {
 
   const ok = selected === Number(q.answerIndex);
 
-  // 解説は必ず表示
   if (ok) {
     lockAfterJudge();
     applyCorrect(q);
@@ -327,7 +377,6 @@ function checkAnswer() {
       state.autoNextTimer = setTimeout(nextQuestion, AUTO_NEXT_DELAY_MS);
       setStatus("正解！自動で次へ進みます。");
     } else {
-      // 最終問題
       setResult({
         ok: true,
         msg: `正解です。全問クリア！レベル+${LEVEL_PLUS}！`,
@@ -345,7 +394,10 @@ function checkAnswer() {
       autoNextText: ""
     });
     unlockForRetry();
-    $("checkBtn").disabled = false; // 押せる状態維持
+
+    const checkBtn = $("checkBtn");
+    if (checkBtn) checkBtn.disabled = false;
+
     setStatus("不正解のときは、選び直して「判定する」を押してください。");
   }
 }
@@ -353,21 +405,8 @@ function checkAnswer() {
 function startAdventure() {
   clearAutoNextTimer();
 
-  state.index = 0;
-  state.cleared = new Set();
-  state.level = 1;
-
-  $("topScreen").classList.add("hidden");
-  $("endingScreen").classList.add("hidden");
-  $("gameScreen").classList.remove("hidden");
-
-  updateStats();
-  showQuestion(); // ← Q01（＝チュートリアルの平原）
-  }
-
-  state.heroName = heroName;
-
-  const saved = loadProgress(heroName);
+  // 進捗を復元（あれば）
+  const saved = loadProgress();
   state.index = 0;
   state.cleared = new Set();
   state.level = 1;
@@ -378,20 +417,19 @@ function startAdventure() {
     if (Number.isFinite(saved.level)) state.level = saved.level;
   }
 
-  $("topScreen").classList.add("hidden");
-  $("endingScreen").classList.add("hidden");
-  $("gameScreen").classList.remove("hidden");
+  $("topScreen")?.classList.add("hidden");
+  $("endingScreen")?.classList.add("hidden");
+  $("gameScreen")?.classList.remove("hidden");
 
   updateStats();
   showQuestion();
-  setStatus(`勇者「${state.heroName}」の冒険を開始！`);
+  setStatus("冒険を開始しました！");
 }
 
 function resetAll() {
   clearAutoNextTimer();
 
-  if (!state.heroName) return;
-  const ok = confirm(`勇者「${state.heroName}」の進捗をリセットしますか？`);
+  const ok = confirm("進捗をリセットしますか？");
   if (!ok) return;
 
   resetProgress();
@@ -436,29 +474,33 @@ async function loadQuestions() {
   return questions;
 }
 
-(function init(){
+document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("stage-default");
 
-  $("startAdventureBtn").addEventListener("click", startAdventure);
-  $("checkBtn").addEventListener("click", checkAnswer);
-  $("resetBtn").addEventListener("click", resetAll);
-  $("restartBtn").addEventListener("click", () => location.reload());
+  // イベント登録（存在チェック付き）
+  const startBtn = $("startAdventureBtn");
+  if (startBtn) startBtn.addEventListener("click", startAdventure);
 
-  $("heroName").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") startAdventure();
-  });
+  const checkBtn = $("checkBtn");
+  if (checkBtn) checkBtn.addEventListener("click", checkAnswer);
 
-  // まずトップに学習内容を出したいので、JSON読み込み後に反映
+  const resetBtn = $("resetBtn");
+  if (resetBtn) resetBtn.addEventListener("click", resetAll);
+
+  const restartBtn = $("restartBtn");
+  if (restartBtn) restartBtn.addEventListener("click", () => location.reload());
+
+  // TOPに学習内容を出す（JSON読み込み後）
   (async () => {
     try {
       state.questions = await loadQuestions();
       setTopLearnTopics();
+      updateStats(); // 進捗表示を初期化
     } catch (e) {
       console.error(e);
-      // JSONが読めなくてもトップは出す（デフォルト内容で）
       state.learnTopics = [];
       setTopLearnTopics();
       alert(String(e.message || e));
     }
   })();
-})();
+});
