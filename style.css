@@ -34,6 +34,40 @@ body.stage-default{
     radial-gradient(900px 500px at 90% 10%, rgba(36,179,201,.10), transparent 55%),
     var(--bg);
 }
+/* ===== レベルアップ演出（必須） ===== */
+.levelUp{
+  margin: 6px 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 8px 10px;
+  border-radius: 12px;
+
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.levelUp .arrow{
+  opacity: .75;
+}
+
+/* hidden は display:none なので、外した瞬間にアニメ開始 */
+.levelUp.play{
+  animation: levelUpPop 0.65s ease-out forwards;
+}
+
+@keyframes levelUpPop{
+  0%   { opacity: 0; transform: scale(0.75); }
+  60%  { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 
 body.stage-tutorial{
 e{
