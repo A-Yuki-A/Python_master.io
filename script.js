@@ -1,27 +1,24 @@
 "use strict";
 
 /**
- * questions.json 形式（例）
- * [
- *  {
- *    "id": "Q01",
- *    "stageName": "チュートリアルの平原",
- *    "preTalk": "...",
- *    "preImage": "images/scene01.JPG",
- *    "prompt": "...",
- *    "pythonCode": "...",
- *    "refCode": "...",
- *    "choices": ["...", "...", "...", "...", "..."],
- *    "answerIndex": 0,
- *    "explain": "..."
- *  }
- * ]
+ * questions.json は 2形式に対応
+ * A) 配列のみ:
+ *    [ {id, stageName, ...} ]
+ * B) meta + questions:
+ *    { meta:{ learnTopics:[...] }, questions:[ ... ] }
  */
 
 const $ = (id) => document.getElementById(id);
 
 const LEVEL_PLUS = 5;
 const AUTO_NEXT_DELAY_MS = 1200;
+
+const DEFAULT_LEARN_TOPICS = [
+  "range を使った繰り返し",
+  "変数と値の変化",
+  "コードの実行結果の読み取り",
+  "共通テスト形式の疑似コード"
+];
 
 /** ステージ背景の割り当て（必要なら追加してOK） */
 const STAGE_THEME_RULES = [
@@ -34,15 +31,16 @@ const STAGE_THEME_RULES = [
 const state = {
   heroName: "",
   questions: [],
+  learnTopics: [],
   index: 0,
-  cleared: new Set(),   // クリアした問題id
+  cleared: new Set(),
   level: 1,
-  judged: false,        // 判定済みか
+  judged: false,
   autoNextTimer: null,
 };
 
 function storageKey(heroName) {
-  return `pyquest_progress_v2_${heroName}`;
+  return `pyquest_progress_v3_${heroName}`;
 }
 
 function loadProgress(heroName) {
@@ -66,13 +64,19 @@ function resetProgress() {
   localStorage.removeItem(storageKey(state.heroName));
 }
 
+function clearAutoNextTimer() {
+  if (state.autoNextTimer) {
+    clearTimeout(state.autoNextTimer);
+    state.autoNextTimer = null;
+  }
+}
+
 function setStatus(msg) {
   $("statusNote").textContent = msg || "";
 }
 
 function setBodyTheme(stageName) {
-  // まず全部外す
-  const classes = ["stage-default", "stage-tutorial", "stage-cave", "stage-volcano", "stage-ice"];
+  const classes = ["stage-default","stage-tutorial","stage-cave","stage-volcano","stage-ice"];
   classes.forEach(c => document.body.classList.remove(c));
 
   const name = String(stageName || "");
@@ -84,47 +88,56 @@ function setBodyTheme(stageName) {
       break;
     }
   }
-
   document.body.classList.add(theme);
 }
 
-function setResult({ ok, msg, explain, autoNextText }) {
-  const box = $("resultBox");
-  box.hidden = false;
-
-  $("resultHead").textContent = ok ? "正解！" : "不正解…";
-  $("resultHead").style.background = ok ? "#e8fff1" : "#fff0f0";
-
-  $("resultMsg").textContent = msg;
-
-  // 解説は必ず表示（空なら「準備中」）
-  const exp = (explain && String(explain).trim()) ? explain : "（解説は準備中です）";
-  $("explainText").textContent = exp;
-
-  $("autoNextText").textContent = autoNextText || "";
+function renderLearnList(listEl, topics) {
+  listEl.innerHTML = "";
+  topics.forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    listEl.appendChild(li);
+  });
 }
 
-function hideResult() {
-  $("resultBox").hidden = true;
-  $("resultMsg").textContent = "";
-  $("explainText").textContent = "";
-  $("autoNextText").textContent = "";
+function setTopLearnTopics() {
+  // トップ画面（JSONのmetaがあれば自動。なければデフォルト）
+  const topics = (Array.isArray(state.learnTopics) && state.learnTopics.length)
+    ? state.learnTopics
+    : DEFAULT_LEARN_TOPICS;
+
+  renderLearnList($("learnList"), topics);
+
+  const note = (Array.isArray(state.learnTopics) && state.learnTopics.length)
+    ? "※ この一覧は questions.json の meta.learnTopics から自動表示しています。"
+    : "※ meta.learnTopics が未設定のため、デフォルト表示です。";
+
+  $("learnNote").textContent = note;
 }
 
-function updateHeader(q) {
-  $("stageBadge").textContent = q?.stageName ? `ステージ：${q.stageName}` : "ステージ";
-  $("qidPill").textContent = q?.id ? q.id : "Q-";
+function setEndLearnTopics() {
+  const topics = (Array.isArray(state.learnTopics) && state.learnTopics.length)
+    ? state.learnTopics
+    : DEFAULT_LEARN_TOPICS;
+
+  renderLearnList($("endLearnList"), topics);
 }
 
 function updateStats() {
   const total = state.questions.length || 0;
   const clearedCount = state.cleared.size;
 
-  $("levelText").textContent = state.heroName ? `Lv.${state.level}` : "-";
-  $("progressText").textContent = state.heroName ? `${clearedCount}/${total}` : "-";
+  $("heroText").textContent = state.heroName ? state.heroName : "-";
+  $("levelText").textContent = state.heroName ? `Lv.${state.level}` : "Lv.1";
+  $("progressText").textContent = `${clearedCount}/${total}`;
 
   const pct = total ? Math.round((clearedCount / total) * 100) : 0;
   $("progressFill").style.width = `${pct}%`;
+}
+
+function updateHeader(q) {
+  $("stageBadge").textContent = q?.stageName ? `ステージ：${q.stageName}` : "ステージ";
+  $("qidPill").textContent = q?.id ? q.id : "Q-";
 }
 
 function renderTalk(q) {
@@ -144,6 +157,27 @@ function renderProblem(q) {
   $("promptText").textContent = q.prompt || "";
   $("pythonCode").textContent = q.pythonCode || "";
   $("refCode").textContent = q.refCode || "";
+}
+
+function hideResult() {
+  $("resultBox").hidden = true;
+  $("resultMsg").textContent = "";
+  $("explainText").textContent = "";
+  $("autoNextText").textContent = "";
+}
+
+function setResult({ ok, msg, explain, autoNextText }) {
+  $("resultBox").hidden = false;
+  $("resultHead").textContent = ok ? "正解！" : "不正解…";
+  $("resultHead").style.background = ok ? "#e8fff1" : "#fff0f0";
+
+  $("resultMsg").textContent = msg;
+
+  // 解説は必ず表示（空なら準備中）
+  const exp = (explain && String(explain).trim()) ? explain : "（解説は準備中です）";
+  $("explainText").textContent = exp;
+
+  $("autoNextText").textContent = autoNextText || "";
 }
 
 function renderChoices(q) {
@@ -170,7 +204,7 @@ function renderChoices(q) {
     label.appendChild(span);
 
     label.addEventListener("click", () => {
-      if (state.judged) return; // 判定後は触れない
+      if (state.judged) return;
       input.checked = true;
       $("checkBtn").disabled = false;
       hideResult();
@@ -190,26 +224,6 @@ function getSelectedIndex() {
   return Number.isFinite(n) ? n : null;
 }
 
-function applyCorrect(q) {
-  // クリア登録（初回だけカウントしたいならここで条件分岐）
-  const wasCleared = state.cleared.has(q.id);
-  state.cleared.add(q.id);
-
-  // レベルは「正解1回につき +5」
-  // ただし同じ問題を何度も正解して稼げないように、初回だけ加算にする
-  if (!wasCleared) state.level += LEVEL_PLUS;
-
-  saveProgress();
-  updateStats();
-}
-
-function clearAutoNextTimer() {
-  if (state.autoNextTimer) {
-    clearTimeout(state.autoNextTimer);
-    state.autoNextTimer = null;
-  }
-}
-
 function canGoNext() {
   return state.index < state.questions.length - 1;
 }
@@ -224,6 +238,8 @@ function showQuestion() {
 
   setBodyTheme(q.stageName);
   updateHeader(q);
+  updateStats();
+
   renderTalk(q);
   renderProblem(q);
   renderChoices(q);
@@ -234,63 +250,51 @@ function showQuestion() {
   setStatus("選択肢を選んで「判定する」を押してください。");
 }
 
-async function loadQuestions() {
-  const res = await fetch("questions.json", { cache: "no-store" });
-  if (!res.ok) throw new Error("questions.json が読み込めませんでした");
+function applyCorrect(q) {
+  const wasCleared = state.cleared.has(q.id);
+  state.cleared.add(q.id);
 
-  const data = await res.json();
-  if (!Array.isArray(data)) throw new Error("questions.json は配列である必要があります");
+  // 初回正解だけレベル加算（稼ぎ防止）
+  if (!wasCleared) state.level += LEVEL_PLUS;
 
-  data.forEach((q, i) => {
-    if (!q.id) throw new Error(`${i}番目の問題に id がありません`);
-    if (!Array.isArray(q.choices)) throw new Error(`${q.id} の choices が配列ではありません`);
-    if (!Number.isFinite(Number(q.answerIndex))) throw new Error(`${q.id} の answerIndex が数値ではありません`);
-  });
-
-  return data;
-}
-
-function startGame() {
-  clearAutoNextTimer();
-
-  const heroName = $("heroName").value.trim();
-  if (!heroName) {
-    alert("勇者の名前を入力してください。");
-    return;
-  }
-
-  state.heroName = heroName;
-
-  // 進捗ロード（同じブラウザなら続きから）
-  const saved = loadProgress(heroName);
-  state.index = 0;
-  state.cleared = new Set();
-  state.level = 1;
-
-  if (saved) {
-    if (Number.isFinite(saved.index)) state.index = saved.index;
-    if (Array.isArray(saved.clearedIds)) state.cleared = new Set(saved.clearedIds);
-    if (Number.isFinite(saved.level)) state.level = saved.level;
-  }
-
+  saveProgress();
   updateStats();
-  showQuestion();
-
-  $("startBtn").textContent = "続きから";
-  setStatus(`勇者「${heroName}」の修行を開始！`);
 }
 
 function lockAfterJudge() {
   state.judged = true;
   $("checkBtn").disabled = true;
-  // ラジオもクリック無効に（見た目は残す）
   document.querySelectorAll('input[name="choice"]').forEach(el => el.disabled = true);
 }
 
 function unlockForRetry() {
   state.judged = false;
-  $("checkBtn").disabled = false; // 選択されていれば押せるようにする
   document.querySelectorAll('input[name="choice"]').forEach(el => el.disabled = false);
+}
+
+function goEnding() {
+  // エンディングに到達レベルを表示
+  $("endHero").textContent = state.heroName;
+  $("endLevel").textContent = `Lv.${state.level}`;
+  $("endCorrect").textContent = `${state.cleared.size}/${state.questions.length}`;
+
+  setEndLearnTopics();
+
+  $("gameScreen").classList.add("hidden");
+  $("endingScreen").classList.remove("hidden");
+}
+
+function nextQuestion() {
+  clearAutoNextTimer();
+
+  if (!canGoNext()) {
+    goEnding();
+    return;
+  }
+  state.index += 1;
+  saveProgress();
+  updateStats();
+  showQuestion();
 }
 
 function checkAnswer() {
@@ -316,50 +320,65 @@ function checkAnswer() {
     if (canGoNext()) {
       setResult({
         ok: true,
-        msg: `正解です。勇者「${state.heroName}」はレベルアップ！（+${LEVEL_PLUS}）`,
+        msg: `正解です。レベル+${LEVEL_PLUS}！`,
         explain: q.explain || "",
         autoNextText: `${AUTO_NEXT_DELAY_MS / 1000}秒後に自動で次の問題へ進みます…`
       });
-
-      // 自動で次へ
-      state.autoNextTimer = setTimeout(() => {
-        nextQuestion();
-      }, AUTO_NEXT_DELAY_MS);
-
+      state.autoNextTimer = setTimeout(nextQuestion, AUTO_NEXT_DELAY_MS);
       setStatus("正解！自動で次へ進みます。");
     } else {
+      // 最終問題
       setResult({
         ok: true,
-        msg: `正解です。全問クリア！勇者「${state.heroName}」は修行を終えました。（+${LEVEL_PLUS}）`,
+        msg: `正解です。全問クリア！レベル+${LEVEL_PLUS}！`,
         explain: q.explain || "",
-        autoNextText: ""
+        autoNextText: `エンディングへ移動します…`
       });
+      state.autoNextTimer = setTimeout(goEnding, AUTO_NEXT_DELAY_MS);
       setStatus("全問クリアです！");
     }
   } else {
-    // 不正解でも解説は出す（必ず表示）
     setResult({
       ok: false,
       msg: "不正解です。解説を読んで、もう一度選び直しましょう。",
       explain: q.explain || "",
       autoNextText: ""
     });
-
-    // 不正解は再挑戦できる（ロックしない）
     unlockForRetry();
+    $("checkBtn").disabled = false; // 押せる状態維持
     setStatus("不正解のときは、選び直して「判定する」を押してください。");
   }
 }
 
-function nextQuestion() {
+function startAdventure() {
   clearAutoNextTimer();
 
-  if (!canGoNext()) return;
-  state.index += 1;
+  const heroName = $("heroName").value.trim();
+  if (!heroName) {
+    alert("勇者の名前を入力してください。");
+    return;
+  }
 
-  saveProgress();
+  state.heroName = heroName;
+
+  const saved = loadProgress(heroName);
+  state.index = 0;
+  state.cleared = new Set();
+  state.level = 1;
+
+  if (saved) {
+    if (Number.isFinite(saved.index)) state.index = saved.index;
+    if (Array.isArray(saved.clearedIds)) state.cleared = new Set(saved.clearedIds);
+    if (Number.isFinite(saved.level)) state.level = saved.level;
+  }
+
+  $("topScreen").classList.add("hidden");
+  $("endingScreen").classList.add("hidden");
+  $("gameScreen").classList.remove("hidden");
+
   updateStats();
   showQuestion();
+  setStatus(`勇者「${state.heroName}」の冒険を開始！`);
 }
 
 function resetAll() {
@@ -379,26 +398,61 @@ function resetAll() {
   showQuestion();
 }
 
-(async function init(){
-  // 初期テーマ
-  document.body.classList.add("stage-default");
+async function loadQuestions() {
+  const res = await fetch("questions.json", { cache: "no-store" });
+  if (!res.ok) throw new Error("questions.json が読み込めませんでした");
 
-  $("startBtn").addEventListener("click", startGame);
-  $("checkBtn").addEventListener("click", checkAnswer);
-  $("resetBtn").addEventListener("click", resetAll);
+  const raw = await res.json();
 
-  $("heroName").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") startGame();
-  });
+  // 2形式対応
+  let questions;
+  let learnTopics = [];
 
-  try {
-    state.questions = await loadQuestions();
-    setStatus("questions.json を読み込みました。勇者名を入力して開始してください。");
-  } catch (e) {
-    console.error(e);
-    setStatus("エラー：questions.json を読み込めません。配置を確認してください。");
-    alert(String(e.message || e));
+  if (Array.isArray(raw)) {
+    questions = raw;
+  } else if (raw && typeof raw === "object" && Array.isArray(raw.questions)) {
+    questions = raw.questions;
+    if (raw.meta && Array.isArray(raw.meta.learnTopics)) {
+      learnTopics = raw.meta.learnTopics;
+    }
+  } else {
+    throw new Error("questions.json の形式が不正です（配列 or {meta,questions}）");
   }
 
-  updateStats();
+  // 最低限チェック
+  questions.forEach((q, i) => {
+    if (!q.id) throw new Error(`${i}番目の問題に id がありません`);
+    if (!Array.isArray(q.choices)) throw new Error(`${q.id} の choices が配列ではありません`);
+    if (!Number.isFinite(Number(q.answerIndex))) throw new Error(`${q.id} の answerIndex が数値ではありません`);
+  });
+
+  state.learnTopics = learnTopics;
+  return questions;
+}
+
+(function init(){
+  document.body.classList.add("stage-default");
+
+  $("startAdventureBtn").addEventListener("click", startAdventure);
+  $("checkBtn").addEventListener("click", checkAnswer);
+  $("resetBtn").addEventListener("click", resetAll);
+  $("restartBtn").addEventListener("click", () => location.reload());
+
+  $("heroName").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") startAdventure();
+  });
+
+  // まずトップに学習内容を出したいので、JSON読み込み後に反映
+  (async () => {
+    try {
+      state.questions = await loadQuestions();
+      setTopLearnTopics();
+    } catch (e) {
+      console.error(e);
+      // JSONが読めなくてもトップは出す（デフォルト内容で）
+      state.learnTopics = [];
+      setTopLearnTopics();
+      alert(String(e.message || e));
+    }
+  })();
 })();
