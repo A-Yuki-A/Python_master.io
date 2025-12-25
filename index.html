@@ -1,73 +1,180 @@
-const $ = id => document.getElementById(id);
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>勇者のPython修行</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-let questions = [];
-let index = 0;
-let level = 1;
+<body class="stage-default">
 
-/* ===== JSON読み込み ===== */
-fetch("questions.json")
-  .then(res => res.json())
-  .then(data => {
-    questions = data;
-  });
+  <!-- ===== トップ画面 ===== -->
+  <section id="topScreen" class="topScreen">
+    <div class="topCard">
+      <h1 class="topTitle">勇者のPython修行</h1>
 
-/* ===== 冒険開始 ===== */
-$("startAdventureBtn").addEventListener("click", () => {
-  const name = $("heroName").value.trim();
-  if (!name) {
-    alert("勇者の名前を入力してください");
-    return;
-  }
+      <p class="topText">
+        進む勇気がある者は、ここから先へ。<br>
+        コードを読み解き、試練を突破せよ。
+      </p>
 
-  $("topScreen").classList.add("hidden");
-  $("gameScreen").classList.remove("hidden");
+      <!-- これから学ぶ内容（JSONから自動） -->
+      <div class="learnBox">
+        <h2 class="learnBox__title">これから学ぶ内容</h2>
+        <ul id="learnList" class="learnBox__list"></ul>
+        <p id="learnNote" class="learnBox__note"></p>
+      </div>
 
-  showQuestion();
-});
+      <label class="label">勇者の名前</label>
+      <input id="heroName" class="input" type="text" placeholder="例：アキヨシ">
 
-/* ===== 問題表示 ===== */
-function showQuestion(){
-  const q = questions[index];
+      <button id="startAdventureBtn" class="btn btn--primary bigBtn">
+        冒険を始める
+      </button>
 
-  $("qidPill").textContent = q.id;
-  $("stageBadge").textContent = "ステージ：" + q.stageName;
-  $("talkText").textContent = q.preTalk;
-  $("talkImage").src = q.preImage;
-  $("promptText").textContent = q.prompt;
-  $("pythonCode").textContent = q.pythonCode;
-  $("refCode").textContent = q.refCode;
+      <p class="smallNote">
+        ※ 正解すると自動で次の問題へ進みます（正解1回でレベル+5）
+      </p>
+    </div>
+  </section>
 
-  $("choicesForm").innerHTML = "";
-  q.choices.forEach((c,i)=>{
-    const label = document.createElement("label");
-    label.innerHTML = `
-      <input type="radio" name="choice" value="${i}">
-      ${c}
-    `;
-    $("choicesForm").appendChild(label);
-  });
-}
+  <!-- ===== ゲーム画面 ===== -->
+  <div id="gameScreen" class="hidden">
 
-/* ===== 判定 ===== */
-$("checkBtn").addEventListener("click", ()=>{
-  const checked = document.querySelector("input[name='choice']:checked");
-  if (!checked) return;
+    <header class="heroHeader">
+      <div class="heroHeader__inner">
+        <div>
+          <div class="badge" id="stageBadge">ステージ</div>
+          <h1 class="title">勇者のPython修行</h1>
+          <p class="subtitle">正解すると自動で次へ進みます</p>
+        </div>
 
-  const q = questions[index];
-  if (Number(checked.value) === q.answerIndex){
-    level += 5;
-    $("levelText").textContent = "Lv." + level;
-    $("resultMsg").textContent = "正解！";
-    $("explainText").textContent = q.explain;
+        <div class="heroBox">
+          <div class="stats">
+            <div class="stat">
+              <div class="stat__k">勇者</div>
+              <div class="stat__v" id="heroText">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat__k">レベル</div>
+              <div class="stat__v" id="levelText">Lv.1</div>
+            </div>
+            <div class="stat">
+              <div class="stat__k">進捗</div>
+              <div class="stat__v" id="progressText">0/0</div>
+            </div>
+          </div>
+          <div class="tiny">正解1回につき +5</div>
+        </div>
+      </div>
 
-    setTimeout(()=>{
-      index++;
-      if(index < questions.length){
-        showQuestion();
-      }
-    },1200);
-  }else{
-    $("resultMsg").textContent = "不正解…";
-    $("explainText").textContent = q.explain;
-  }
-});
+      <div class="progressWrap">
+        <div class="progressBar" aria-label="進捗バー">
+          <div class="progressBar__fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">長老のことば</h2>
+        </div>
+        <div class="card__body talk">
+          <img id="talkImage" class="talk__img" alt="シーン画像">
+          <pre id="talkText" class="talk__text"></pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">問題</h2>
+          <div class="pill" id="qidPill">Q-</div>
+        </div>
+
+        <div class="card__body">
+          <p id="promptText" class="prompt"></p>
+
+          <div class="codeGrid">
+            <div class="codeBox">
+              <div class="codeBox__title">Pythonコード</div>
+              <pre id="pythonCode" class="code"></pre>
+            </div>
+            <div class="codeBox">
+              <div class="codeBox__title">共通テスト言語（参照）</div>
+              <pre id="refCode" class="code"></pre>
+            </div>
+          </div>
+
+          <div class="choices">
+            <div class="choices__title">【　】に当てはまるものを選びなさい</div>
+            <form id="choicesForm" class="choices__form"></form>
+          </div>
+
+          <div class="actions">
+            <button id="checkBtn" class="btn btn--primary" disabled>判定する</button>
+            <button id="resetBtn" class="btn btn--danger" disabled>進捗リセット</button>
+          </div>
+
+          <div id="resultBox" class="result" hidden>
+            <div class="result__head" id="resultHead">結果</div>
+            <div class="result__body">
+              <p id="resultMsg" class="result__msg"></p>
+
+              <div class="explainBlock">
+                <div class="explainBlock__title">解説</div>
+                <p id="explainText" class="result__explain"></p>
+              </div>
+
+              <p class="autoNext" id="autoNextText"></p>
+            </div>
+          </div>
+
+          <p class="note" id="statusNote"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <small>GitHub Pages で動作します（データ：questions.json）</small>
+    </footer>
+  </div>
+
+  <!-- ===== エンディング画面 ===== -->
+  <section id="endingScreen" class="topScreen hidden">
+    <div class="topCard">
+      <h1 class="topTitle">冒険クリア！</h1>
+
+      <p class="topText">
+        すべての試練を乗り越えました。<br>
+        勇者は成長し、新たな力を手に入れました。
+      </p>
+
+      <div class="endStats">
+        <div class="endStat">
+          <div class="endStat__k">勇者</div>
+          <div class="endStat__v" id="endHero">-</div>
+        </div>
+        <div class="endStat">
+          <div class="endStat__k">最終レベル</div>
+          <div class="endStat__v" id="endLevel">Lv.-</div>
+        </div>
+        <div class="endStat">
+          <div class="endStat__k">正解数</div>
+          <div class="endStat__v" id="endCorrect">-</div>
+        </div>
+      </div>
+
+      <div class="learnBox">
+        <h2 class="learnBox__title">これから学ぶ内容（ふり返り）</h2>
+        <ul id="endLearnList" class="learnBox__list"></ul>
+      </div>
+
+      <button id="restartBtn" class="btn btn--primary bigBtn">もう一度冒険する</button>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
