@@ -3,6 +3,7 @@
 /* ===== 設定 ===== */
 const DATA_URL = "/Python_master.io/questions.json";
 const AUTO_NEXT_MS = 900;
+const POPUP_MS = 2000;
 
 /* ===== DOM取得 ===== */
 const el = {
@@ -31,7 +32,7 @@ const el = {
   explainText: document.getElementById("explainText"),
   autoNextText: document.getElementById("autoNextText"),
 
-  /* ★ ポップアップ用 */
+  /* ポップアップ */
   popup: document.getElementById("popup"),
   popupResult: document.getElementById("popupResult"),
   popupBefore: document.getElementById("popupBefore"),
@@ -45,7 +46,7 @@ let state = {
   level: 1
 };
 
-/* ===== Pyodide（Python実行） ===== */
+/* ===== Pyodide ===== */
 let pyodideReady = null;
 
 async function runPython(code){
@@ -53,7 +54,6 @@ async function runPython(code){
     pyodideReady = loadPyodide();
   }
   const py = await pyodideReady;
-
   try{
     py.runPython(`
 import sys
@@ -68,7 +68,7 @@ sys.stdout = StringIO()
   }
 }
 
-/* ===== 表示処理 ===== */
+/* ===== 表示 ===== */
 function renderQuestion(){
   const q = questions[state.index];
   if(!q) return;
@@ -106,7 +106,7 @@ function renderQuestion(){
   el.backBtn.disabled = (state.index === 0);
 }
 
-/* ===== 判定処理 ===== */
+/* ===== 判定 ===== */
 function judge(){
   const q = questions[state.index];
   const checked = el.choicesForm.querySelector("input[name='choice']:checked");
@@ -120,24 +120,21 @@ function judge(){
   el.explainText.textContent = q.explain || "";
   el.autoNextText.textContent = "";
 
+  /* ===== ポップアップ共通初期化 ===== */
+  el.popup.classList.remove("hidden");
+  el.popupBefore.textContent = "";
+  el.popupAfter.textContent = "";
+
   if(ok){
+    /* 正解処理 */
     const add = Number(q.levelAward) || 1;
     state.level += add;
 
-    /* ===== ヘッダ更新 ===== */
     el.levelText.textContent = `Lv.${state.level}`;
 
-    /* ===== ポップアップ表示 ===== */
     el.popupResult.textContent = "正解！";
     el.popupBefore.textContent = `Lv.${beforeLv}`;
     el.popupAfter.textContent  = `Lv.${state.level}`;
-
-    el.popup.classList.remove("hidden");
-
-    /* 2秒後に消す */
-    setTimeout(() => {
-      el.popup.classList.add("hidden");
-    }, 2000);
 
     /* 次の問題へ */
     if(state.index < questions.length - 1){
@@ -146,7 +143,15 @@ function judge(){
         renderQuestion();
       }, AUTO_NEXT_MS);
     }
+  }else{
+    /* 不正解処理 */
+    el.popupResult.textContent = "残念…";
   }
+
+  /* ===== 2秒後にポップアップを消す ===== */
+  setTimeout(() => {
+    el.popup.classList.add("hidden");
+  }, POPUP_MS);
 }
 
 /* ===== 初期化 ===== */
