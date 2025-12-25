@@ -401,3 +401,24 @@ body.stage-tutorial{
 #pythonEditor::selection{
   background: rgba(255,255,255,.18);
 }
+/* ===== ヘッダ内の並びを逆にする ===== */
+.heroHeader__inner > div:first-child{
+  display: flex;
+  flex-direction: column-reverse; /* ← 順番を逆に */
+  gap: 6px;
+}
+
+/* ===== フォントサイズを逆にする ===== */
+/* ステージ名（小→大） */
+.stageBadge{
+  font-size: 22px;     /* もともと14px → 大きく */
+  padding: 8px 14px;
+  font-weight: 900;
+}
+
+/* タイトル（大→小） */
+.title{
+  font-size: 16px;     /* もともと24px → 小さく */
+  font-weight: 700;
+  margin: 0;
+}
