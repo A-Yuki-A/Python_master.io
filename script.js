@@ -1,50 +1,43 @@
-/* script.js（questions.json が「配列」形式の版）
-  - 同階層の ./questions.json を fetch
-  - 1問ずつ表示
-  - 判定（answerIndex）
-  - 進捗・Lv（levelAward で加算）
-  - preImage を表示
-
-  【game.html 側のid（この名前で用意してください）】
-  stageName, playerLevel, progressText
-  elderText, elderImg
-  qNo, prompt, codePython, codePseudo
-  choicesForm, judgeBtn
-  resultArea, resultMsg, resultExplain
-  nextBtn, restartBtn
+/* script.js
+  - ./questions.json（配列）を読み込み
+  - HTMLの各idに出力
+  - choices（選択肢）表示、answerIndex で判定
+  - 正解時は levelAward 分だけLv加算
+  - 正解時に自動で次の問題へ（最後以外）
 */
 
 (() => {
   "use strict";
 
   const DATA_URL = "./questions.json";
-  const STORAGE_KEY = "python_master_progress_v2";
-  const AUTO_NEXT_MS = 700; // 正解時に自動で次へ（0なら無し）
+  const STORAGE_KEY = "python_master_progress_v3";
 
+  const AUTO_NEXT_MS = 900; // 0にすると自動遷移なし
+
+  // ===== DOM（あなたのHTMLのidに合わせる） =====
   const el = {
-    stageName: document.getElementById("stageName"),
-    playerLevel: document.getElementById("playerLevel"),
+    stageBadge: document.getElementById("stageBadge"),
+    levelText: document.getElementById("levelText"),
     progressText: document.getElementById("progressText"),
 
-    elderText: document.getElementById("elderText"),
-    elderImg: document.getElementById("elderImg"), // <img id="elderImg">
+    talkImage: document.getElementById("talkImage"),
+    talkText: document.getElementById("talkText"),
 
-    qNo: document.getElementById("qNo"),
-    prompt: document.getElementById("prompt"),
-    codePython: document.getElementById("codePython"),
-    codePseudo: document.getElementById("codePseudo"),
+    qidPill: document.getElementById("qidPill"),
+    promptText: document.getElementById("promptText"),
+    pythonCode: document.getElementById("pythonCode"),
+    refCode: document.getElementById("refCode"),
 
     choicesForm: document.getElementById("choicesForm"),
-    judgeBtn: document.getElementById("judgeBtn"),
+    checkBtn: document.getElementById("checkBtn"),
 
-    resultArea: document.getElementById("resultArea"),
+    resultBox: document.getElementById("resultBox"),
     resultMsg: document.getElementById("resultMsg"),
-    resultExplain: document.getElementById("resultExplain"),
-
-    nextBtn: document.getElementById("nextBtn"),
-    restartBtn: document.getElementById("restartBtn"),
+    explainText: document.getElementById("explainText"),
+    autoNextText: document.getElementById("autoNextText"),
   };
 
+  // ===== state =====
   let questions = [];
   let state = loadState();
 
@@ -71,11 +64,6 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  function resetState() {
-    state = { index: 0, level: 1, answered: {} };
-    saveState();
-  }
-
   function clampIndex() {
     if (state.index < 0) state.index = 0;
     if (state.index >= questions.length) state.index = Math.max(0, questions.length - 1);
@@ -90,67 +78,41 @@
     }
   }
 
-  function clearResult() {
-    el.resultArea?.classList.add("hidden");
+  function hideResult() {
+    // あなたのHTMLは hidden 属性で隠している
+    if (el.resultBox) el.resultBox.hidden = true;
     if (el.resultMsg) el.resultMsg.textContent = "";
-    if (el.resultExplain) el.resultExplain.textContent = "";
+    if (el.explainText) el.explainText.textContent = "";
+    if (el.autoNextText) el.autoNextText.textContent = "";
   }
 
-  function showResult(ok, explainText) {
-    el.resultArea?.classList.remove("hidden");
+  function showResult(ok, explain) {
+    if (el.resultBox) el.resultBox.hidden = false;
     if (el.resultMsg) el.resultMsg.textContent = ok ? "正解" : "不正解";
-    if (el.resultExplain) el.resultExplain.textContent = safeText(explainText || "");
+    if (el.explainText) el.explainText.textContent = safeText(explain || "");
   }
 
-  function renderQuestion() {
-    clampIndex();
-    const q = questions[state.index];
-    if (!q) return;
+  function getAnsweredKey(q) {
+    return safeText(q.id || `idx_${state.index}`);
+  }
 
-    // ステージ・進捗
-    if (el.stageName) el.stageName.textContent = safeText(q.stageName || "");
-    if (el.playerLevel) el.playerLevel.textContent = `Lv.${state.level}`;
-    if (el.progressText) el.progressText.textContent = `${state.index + 1}/${questions.length}`;
-
-    setBodyTheme(q.stageName);
-
-    // 長老テキスト・画像
-    if (el.elderText) el.elderText.textContent = safeText(q.preTalk || "");
-    if (el.elderImg) {
-      if (q.preImage) {
-        el.elderImg.src = safeText(q.preImage);
-        el.elderImg.alt = "scene";
-        el.elderImg.classList.remove("hidden");
-      } else {
-        el.elderImg.classList.add("hidden");
-      }
-    }
-
-    // 問題番号
-    if (el.qNo) el.qNo.textContent = safeText(q.id ? `Q-${q.id}` : `Q-${state.index + 1}`);
-
-    // 問題文
-    if (el.prompt) el.prompt.textContent = safeText(q.prompt || "");
-
-    // コード
-    if (el.codePython) el.codePython.textContent = safeText(q.pythonCode || "");
-    if (el.codePseudo) el.codePseudo.textContent = safeText(q.refCode || "");
-
-    // 選択肢
+  function renderChoices(q) {
     el.choicesForm.innerHTML = "";
+
     const choices = Array.isArray(q.choices) ? q.choices : [];
     if (!choices.length) {
-      el.judgeBtn.disabled = true;
+      el.checkBtn.disabled = true;
       const p = document.createElement("p");
       p.textContent = "（choices がありません）";
       p.style.color = "#5b6578";
       el.choicesForm.appendChild(p);
       return;
     }
-    el.judgeBtn.disabled = false;
 
-    const answeredKey = safeText(q.id || `idx_${state.index}`);
-    const prev = state.answered[answeredKey];
+    el.checkBtn.disabled = false;
+
+    const key = getAnsweredKey(q);
+    const prev = state.answered[key];
 
     choices.forEach((text, idx) => {
       const label = document.createElement("label");
@@ -160,21 +122,55 @@
       input.type = "radio";
       input.name = "choice";
       input.value = String(idx);
-
       if (prev !== undefined && Number(prev) === idx) input.checked = true;
 
-      const t = document.createElement("div");
-      t.className = "choice__text";
-      t.textContent = safeText(text);
+      const div = document.createElement("div");
+      div.className = "choice__text";
+      div.textContent = safeText(text);
 
       label.appendChild(input);
-      label.appendChild(t);
+      label.appendChild(div);
+
       el.choicesForm.appendChild(label);
     });
+  }
 
-    clearResult();
+  function renderQuestion() {
+    clampIndex();
+    const q = questions[state.index];
+    if (!q) return;
 
-    if (el.nextBtn) el.nextBtn.disabled = state.index >= questions.length - 1;
+    // ステージ
+    if (el.stageBadge) el.stageBadge.textContent = safeText(q.stageName || "ステージ");
+    setBodyTheme(q.stageName);
+
+    // レベル・進捗
+    if (el.levelText) el.levelText.textContent = `Lv.${state.level}`;
+    if (el.progressText) el.progressText.textContent = `${state.index + 1}/${questions.length}`;
+
+    // 長老テキスト・画像
+    if (el.talkText) el.talkText.textContent = safeText(q.preTalk || "");
+    if (el.talkImage) {
+      if (q.preImage) {
+        el.talkImage.src = safeText(q.preImage);
+        el.talkImage.classList.remove("hidden");
+      } else {
+        el.talkImage.removeAttribute("src");
+        el.talkImage.classList.add("hidden");
+      }
+    }
+
+    // 問題情報
+    if (el.qidPill) el.qidPill.textContent = q.id ? `Q-${safeText(q.id)}` : `Q-${state.index + 1}`;
+    if (el.promptText) el.promptText.textContent = safeText(q.prompt || "");
+    if (el.pythonCode) el.pythonCode.textContent = safeText(q.pythonCode || "");
+    if (el.refCode) el.refCode.textContent = safeText(q.refCode || "");
+
+    // 選択肢
+    renderChoices(q);
+
+    // 結果は毎回隠す
+    hideResult();
   }
 
   function getSelectedIndex() {
@@ -195,79 +191,83 @@
     }
 
     const correctIndex = Number(q.answerIndex);
-    const ok = Number.isFinite(correctIndex) ? (selected === correctIndex) : false;
+    if (!Number.isFinite(correctIndex)) {
+      showResult(true, q.explain || "（answerIndex が未設定のため判定できません）");
+      return;
+    }
 
-    const answeredKey = safeText(q.id || `idx_${state.index}`);
-    const firstTime = (state.answered[answeredKey] === undefined);
+    const key = getAnsweredKey(q);
+    const firstTime = (state.answered[key] === undefined);
 
-    state.answered[answeredKey] = selected;
+    state.answered[key] = selected;
 
-    // 初回正解ならレベル加算（levelAward）
+    const ok = selected === correctIndex;
+
+    // 初回正解なら levelAward 加算
     if (ok && firstTime) {
       const add = Number(q.levelAward);
       if (Number.isFinite(add) && add > 0) state.level += add;
-      else state.level += 1; // levelAwardが無い時の保険
+      else state.level += 1;
     }
 
     saveState();
     showResult(ok, q.explain || "");
 
+    // 自動で次へ
     if (ok && AUTO_NEXT_MS > 0 && state.index < questions.length - 1) {
+      if (el.autoNextText) el.autoNextText.textContent = "正解！ 次の問題へ進みます…";
       window.setTimeout(() => {
         state.index += 1;
         saveState();
         renderQuestion();
       }, AUTO_NEXT_MS);
+    } else {
+      if (el.autoNextText) el.autoNextText.textContent = "";
     }
   }
 
-  function next() {
-    if (state.index < questions.length - 1) {
-      state.index += 1;
-      saveState();
-      renderQuestion();
-    }
-  }
-
+  // ===== init =====
   async function init() {
     try {
       const res = await fetch(DATA_URL, { cache: "no-store" });
       if (!res.ok) throw new Error(`questions.json の読み込みに失敗しました (${res.status})`);
 
       const json = await res.json();
-
-      // ★ここが重要：配列形式かどうか
       if (!Array.isArray(json)) {
-        throw new Error("questions.json が配列形式ではありません。先頭が [ から始まっているか確認してください。");
+        throw new Error("questions.json は配列形式（先頭が [ ）である必要があります。");
       }
 
       questions = json;
-
       if (!questions.length) throw new Error("questions.json の配列が空です。");
 
+      // indexが末尾を超えてたら調整
+      clampIndex();
       renderQuestion();
 
-      el.judgeBtn?.addEventListener("click", judge);
-      el.nextBtn?.addEventListener("click", next);
-      el.restartBtn?.addEventListener("click", () => {
-        resetState();
-        renderQuestion();
+      // ボタンは form の外にあるので submit になりやすい → click を止める
+      el.checkBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        judge();
       });
 
-      // Enterで判定
+      // Enter で判定（ラジオ選択後に便利）
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") judge();
-        if (e.key === "ArrowRight") next();
+        if (e.key === "Enter") {
+          e.preventDefault();
+          judge();
+        }
       });
 
     } catch (err) {
       console.error(err);
-      el.resultArea?.classList.remove("hidden");
+
+      // 画面に表示
+      if (el.resultBox) el.resultBox.hidden = false;
       if (el.resultMsg) el.resultMsg.textContent = "エラー";
-      if (el.resultExplain) {
-        el.resultExplain.textContent =
+      if (el.explainText) {
+        el.explainText.textContent =
           safeText(err?.message || err) +
-          "\n\n・game.html と questions.json が同じ階層か\n・GitHub Pages で questions.json が公開されているか\n・JSONの先頭が [ から始まっているか\nを確認してください。";
+          "\n\n確認ポイント：\n・game.html と questions.json が同じ階層か\n・GitHub Pages で questions.json が 404 になっていないか\n・JSONの先頭が [ から始まっているか";
       }
     }
   }
