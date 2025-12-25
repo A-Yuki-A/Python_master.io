@@ -25,7 +25,7 @@
     "preImage": "images/scene02.JPG",
     "prompt": "次のコードの表示結果はどれか（ｉは変数）\nrangeは指定した範囲の値を取り出す特徴がある。",
     "pythonCode": "for i in range(1,6):\n    print(i)",
-    "refCode": "i を 1 から 7 まで 1 ずつ増やしながら繰り返す:\n? 表示する(i)",
+    "refCode": "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:\n? 表示する(i)",
     "choices": [
       "0,1,2,3,4",
       "0,1,2,3,4,5",
@@ -39,5 +39,6 @@
   }
 
 ]
+
 
 
