@@ -2,9 +2,6 @@
 
 const $ = (id) => document.getElementById(id);
 
-const LEVEL_PLUS = 5;
-const AUTO_NEXT_DELAY_MS = 1200;
-
 const DEFAULT_LEARN_TOPICS = [
   "rangeを使った繰り返し",
   "変数と値の変化",
@@ -14,105 +11,60 @@ const DEFAULT_LEARN_TOPICS = [
 
 const state = {
   questions: [],
-  learnTopics: [],
-  index: 0,
-  level: 1,
-  cleared: new Set(),
-  judged: false
+  learnTopics: []
 };
 
 async function loadQuestions() {
-  const res = await fetch("questions.json", { cache: "no-store" });
-  const json = await res.json();
-  state.questions = json.questions;
-  state.learnTopics = json.meta?.learnTopics || [];
+  try {
+    const res = await fetch("questions.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("fetch失敗");
+    const json = await res.json();
+    state.questions = json.questions || [];
+    state.learnTopics = json.meta?.learnTopics || [];
+  } catch (e) {
+    console.warn("questions.json を読めません。TOPはデフォルト表示にします。");
+    state.learnTopics = [];
+  }
 }
 
-function updateStats() {
-  $("levelText").textContent = `Lv.${state.level}`;
-  $("progressText").textContent =
-    `${state.cleared.size}/${state.questions.length}`;
-}
+/* ===== TOP画面 ===== */
+function setTopLearnTopics() {
+  const ul = $("learnList");
+  if (!ul) return;
 
-function showQuestion() {
-  const q = state.questions[state.index];
-  if (!q) return;
+  const topics = state.learnTopics.length
+    ? state.learnTopics
+    : DEFAULT_LEARN_TOPICS;
 
-  $("stageBadge").textContent = `ステージ：${q.stageName}`;
-  $("qidPill").textContent = q.id;
-
-  $("talkText").textContent = q.preTalk || "";
-  $("talkImage").src = q.preImage || "";
-
-  $("promptText").textContent = q.prompt || "";
-  $("pythonCode").textContent = q.pythonCode || "";
-  $("refCode").textContent = q.refCode || "";
-
-  const form = $("choicesForm");
-  form.innerHTML = "";
-
-  q.choices.forEach((c, i) => {
-    const label = document.createElement("label");
-    label.className = "choice";
-
-    const input = document.createElement("input");
-    input.type = "radio";
-    input.name = "choice";
-    input.value = i;
-
-    const span = document.createElement("span");
-    span.className = "choice__text";
-    span.textContent = c;
-
-    label.appendChild(input);
-    label.appendChild(span);
-
-    label.onclick = () => {
-      if (!state.judged) $("checkBtn").disabled = false;
-    };
-
-    form.appendChild(label);
+  ul.innerHTML = "";
+  topics.forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    ul.appendChild(li);
   });
 
-  $("checkBtn").disabled = true;
-  $("resultBox").hidden = true;
-  state.judged = false;
-}
-
-function checkAnswer() {
-  if (state.judged) return;
-
-  const checked = document.querySelector("input[name=choice]:checked");
-  if (!checked) return;
-
-  const q = state.questions[state.index];
-  const ok = Number(checked.value) === q.answerIndex;
-
-  $("resultBox").hidden = false;
-  $("explainText").textContent = q.explain || "（解説は準備中）";
-
-  if (ok) {
-    $("resultMsg").textContent = "正解！";
-    state.level += LEVEL_PLUS;
-    state.cleared.add(q.id);
-    updateStats();
-
-    setTimeout(() => {
-      state.index++;
-      if (state.index < state.questions.length) {
-        showQuestion();
-      }
-    }, AUTO_NEXT_DELAY_MS);
-  } else {
-    $("resultMsg").textContent = "不正解";
+  const note = $("learnNote");
+  if (note) {
+    note.textContent =
+      "※ この一覧は questions.json の meta.learnTopics から自動表示しています。";
   }
-
-  state.judged = true;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+
+  /* --- 冒険を始めるボタンは最優先で有効化 --- */
+  const startBtn = $("startAdventureBtn");
+  if (startBtn) {
+    startBtn.addEventListener("click", () => {
+      location.href = "game.html";
+    });
+  }
+
+  /* --- JSON読み込み（失敗してもOK） --- */
   await loadQuestions();
-  updateStats();
-  showQuestion();
-  $("checkBtn").onclick = checkAnswer;
+
+  /* --- TOP画面なら学習内容を表示 --- */
+  if ($("learnList")) {
+    setTopLearnTopics();
+  }
 });
