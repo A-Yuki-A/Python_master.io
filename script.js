@@ -29,7 +29,7 @@ const STAGE_THEME_RULES = [
 ];
 
 const state = {
-  heroName: "",
+  heroName: "アルテミス",
   questions: [],
   learnTopics: [],
   index: 0,
@@ -353,10 +353,16 @@ function checkAnswer() {
 function startAdventure() {
   clearAutoNextTimer();
 
-  const heroName = $("heroName").value.trim();
-  if (!heroName) {
-    alert("勇者の名前を入力してください。");
-    return;
+  state.index = 0;
+  state.cleared = new Set();
+  state.level = 1;
+
+  $("topScreen").classList.add("hidden");
+  $("endingScreen").classList.add("hidden");
+  $("gameScreen").classList.remove("hidden");
+
+  updateStats();
+  showQuestion(); // ← Q01（＝チュートリアルの平原）
   }
 
   state.heroName = heroName;
