@@ -18,8 +18,7 @@ const state = {
   index: 0,
   level: 1,
   cleared: new Set(),
-  judged: false,
-  timer: null
+  judged: false
 };
 
 async function loadQuestions() {
@@ -29,27 +28,6 @@ async function loadQuestions() {
   state.learnTopics = json.meta?.learnTopics || [];
 }
 
-/* ---------- TOP画面 ---------- */
-function setTopLearnTopics() {
-  const ul = $("learnList");
-  if (!ul) return;
-
-  const topics = state.learnTopics.length
-    ? state.learnTopics
-    : DEFAULT_LEARN_TOPICS;
-
-  ul.innerHTML = "";
-  topics.forEach(t => {
-    const li = document.createElement("li");
-    li.textContent = t;
-    ul.appendChild(li);
-  });
-
-  $("learnNote").textContent =
-    "※ この一覧は questions.json の meta.learnTopics から自動表示しています。";
-}
-
-/* ---------- ゲーム画面 ---------- */
 function updateStats() {
   $("levelText").textContent = `Lv.${state.level}`;
   $("progressText").textContent =
@@ -62,10 +40,13 @@ function showQuestion() {
 
   $("stageBadge").textContent = `ステージ：${q.stageName}`;
   $("qidPill").textContent = q.id;
-  $("talkText").textContent = q.preTalk;
+
+  $("talkText").textContent = q.preTalk || "";
   $("talkImage").src = q.preImage || "";
-  $("promptText").textContent = q.prompt;
-  $("pythonCode").textContent = q.pythonCode;
+
+  $("promptText").textContent = q.prompt || "";
+  $("pythonCode").textContent = q.pythonCode || "";
+  $("refCode").textContent = q.refCode || "";
 
   const form = $("choicesForm");
   form.innerHTML = "";
@@ -129,20 +110,9 @@ function checkAnswer() {
   state.judged = true;
 }
 
-/* ---------- 初期化 ---------- */
 document.addEventListener("DOMContentLoaded", async () => {
   await loadQuestions();
-
-  if ($("learnList")) {
-    setTopLearnTopics();
-    $("startAdventureBtn").onclick = () => {
-      location.href = "game.html";
-    };
-  }
-
-  if ($("choicesForm")) {
-    updateStats();
-    showQuestion();
-    $("checkBtn").onclick = checkAnswer;
-  }
+  updateStats();
+  showQuestion();
+  $("checkBtn").onclick = checkAnswer;
 });
