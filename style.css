@@ -415,3 +415,37 @@ e{
     grid-template-columns: 1fr;
   }
 }
+  /* ===== レベルアップ演出 ===== */
+.levelUp{
+  margin: 6px 0 2px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #1f7ae0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  opacity: 0;
+  transform: scale(0.8);
+  animation: levelUpPop 0.6s ease-out forwards;
+}
+
+.levelUp .arrow{
+  opacity: 0.7;
+}
+
+@keyframes levelUpPop{
+  0%{
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  60%{
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100%{
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
