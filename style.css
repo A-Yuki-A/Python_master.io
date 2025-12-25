@@ -15,15 +15,14 @@
   --radius: 14px;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 /* ===== body / 背景 ===== */
 body{
   margin:0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont,
     "Yu Gothic", "ヒラギノ角ゴ ProN", "Meiryo", sans-serif;
+  font-size: 16px;               /* ★ 最低13px確保の土台 */
   color: var(--text);
   background: var(--bg);
 }
@@ -34,117 +33,15 @@ body.stage-default{
     radial-gradient(900px 500px at 90% 10%, rgba(36,179,201,.10), transparent 55%),
     var(--bg);
 }
-/* ===== レベルアップ演出（必須） ===== */
-.levelUp{
-  margin: 6px 0 2px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  font-size: 20px;
-  font-weight: 900;
-  color: #fff;
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.18);
-  padding: 8px 10px;
-  border-radius: 12px;
-
-  opacity: 0;
-  transform: scale(0.85);
-}
-
-.levelUp .arrow{
-  opacity: .75;
-}
-
-/* hidden は display:none なので、外した瞬間にアニメ開始 */
-.levelUp.play{
-  animation: levelUpPop 0.65s ease-out forwards;
-}
-
-@keyframes levelUpPop{
-  0%   { opacity: 0; transform: scale(0.75); }
-  60%  { opacity: 1; transform: scale(1.08); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
 
 body.stage-tutorial{
-e{
   background:
     radial-gradient(1200px 600px at 10% 0%, rgba(60, 180, 75, .14), transparent 60%),
     radial-gradient(900px 500px at 90% 10%, rgba(31,122,224,.10), transparent 55%),
     var(--bg);
 }
 
-/* ===== TOP画面 ===== */
-.topScreen{
-  min-height: 100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding: 24px 16px;
-}
-
-.topCard{
-  background: white;
-  width: 92%;
-  max-width: 560px;
-  border-radius: 20px;
-  padding: 28px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
-}
-
-.topTitle{
-  margin: 0 0 10px;
-  font-size: 28px;
-}
-
-.topText{
-  margin: 0 0 16px;
-  line-height: 1.7;
-  color: var(--text);
-}
-
-/* ===== 学習内容 ===== */
-.learnBox{
-  margin: 14px 0;
-  padding: 14px;
-  background: #f0f5ff;
-  border: 1px solid #d7e6ff;
-  border-radius: 14px;
-}
-
-.learnBox__title{
-  margin: 0 0 8px;
-  font-size: 16px;
-  font-weight: 900;
-}
-
-.learnBox__list{
-  margin: 0;
-  padding-left: 20px;
-}
-
-.learnBox__list li{
-  line-height: 1.7;
-  font-size: 14px;
-}
-
-.learnBox__note{
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
 /* ===== ボタン ===== */
-.bigBtn{
-  width:100%;
-  font-size: 18px;
-  padding: 14px 12px;
-  margin-top: 14px;
-}
-
 .btn{
   border: 1px solid var(--line);
   background: #ffffff;
@@ -153,12 +50,10 @@ e{
   border-radius: 12px;
   cursor: pointer;
   font-weight: 900;
+  font-size: 15px;               /* ★ 13px以上 */
 }
 
-.btn:disabled{
-  opacity: .55;
-  cursor: not-allowed;
-}
+.btn:disabled{ opacity: .55; cursor: not-allowed; }
 
 .btn--primary{
   border: none;
@@ -166,10 +61,7 @@ e{
   color: #fff;
 }
 
-.btn--danger{
-  background: var(--danger);
-  color:#fff;
-}
+.btn--danger{ background: var(--danger); color:#fff; }
 
 /* ===== ヘッダ ===== */
 .heroHeader{
@@ -197,7 +89,7 @@ e{
 /* タイトル（小） */
 .title{
   margin: 0;
-  font-size: 16px;
+  font-size: 16px;               /* ★ 13px以上 */
   font-weight: 700;
 }
 
@@ -229,10 +121,7 @@ e{
   min-width: 260px;
 }
 
-.stats{
-  display:flex;
-  gap:10px;
-}
+.stats{ display:flex; gap:10px; }
 
 .stat{
   flex:1;
@@ -243,8 +132,8 @@ e{
 }
 
 .stat__k{
-  font-size: 11px;
-  opacity: .9;
+  font-size: 13px;               /* ★ 11px → 13px */
+  opacity: .92;
 }
 
 .stat__v{
@@ -283,9 +172,7 @@ e{
   font-size: 16px;
 }
 
-.card__body{
-  padding: 14px;
-}
+.card__body{ padding: 14px; }
 
 .pill{
   font-weight: 900;
@@ -294,10 +181,10 @@ e{
   border: 1px solid #d3e7ff;
   padding: 6px 10px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 13px;               /* ★ 12px → 13px */
 }
 
-/* ===== 長老 ===== */
+/* ===== ストーリー ===== */
 .talk{
   display:grid;
   grid-template-columns: 240px 1fr;
@@ -312,14 +199,15 @@ e{
   max-height: 180px;
 }
 
+/* ★ 12px → 13px */
 .talk__text{
   margin:0;
   white-space: pre-wrap;
-  line-height: 1.6;
+  line-height: 1.65;
   background: #fbfcff;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 10px;
+  padding: 12px;
   min-height: 180px;
   font-size: 13px;
 }
@@ -327,11 +215,12 @@ e{
 /* ===== 問題 ===== */
 .prompt{
   margin: 0 0 12px;
-  padding: 10px 12px;
+  padding: 12px 12px;
   background: #fbfcff;
   border: 1px solid var(--line);
   border-radius: 12px;
   white-space: pre-wrap;
+  font-size: 15px;               /* ★ 明示 */
 }
 
 .codeGrid{
@@ -350,9 +239,9 @@ e{
 
 .codeBox__title{
   background: rgba(255,255,255,.08);
-  color: rgba(255,255,255,.9);
-  padding: 8px 10px;
-  font-size: 12px;
+  color: rgba(255,255,255,.92);
+  padding: 10px 10px;
+  font-size: 13px;               /* ★ 12px → 13px */
   border-bottom: 1px solid rgba(255,255,255,.10);
 }
 
@@ -385,33 +274,27 @@ e{
   outline: none;
 }
 
-#pythonEditor::selection{
-  background: rgba(255,255,255,.18);
-}
+#pythonEditor::selection{ background: rgba(255,255,255,.18); }
 
 /* ===== 選択肢 ===== */
-.choices__form{
-  display:grid;
-  gap: 8px;
-}
+.choices__form{ display:grid; gap: 8px; }
 
 .choice{
   display:flex;
   gap: 10px;
   align-items:flex-start;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
   cursor: pointer;
   background: #fbfcff;
 }
 
-.choice input{
-  margin-top: 3px;
-}
+.choice input{ margin-top: 4px; }
 
 .choice__text{
   white-space: pre-wrap;
+  font-size: 15px;               /* ★ 明示 */
 }
 
 /* ===== 結果 ===== */
@@ -420,68 +303,24 @@ e{
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--line);
+  padding: 12px;
+  background: #fff;
 }
 
-.result__msg{
-  font-weight: 900;
-}
+.result__msg{ font-weight: 900; font-size: 16px; }
 
 .result__explain{
   white-space: pre-wrap;
   color: var(--muted);
+  font-size: 14px;               /* ★ 13px以上 */
 }
 
 .autoNext{
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 13px;               /* ★ 12px → 13px */
   color: var(--muted);
 }
 
-/* ===== レスポンシブ ===== */
-@media (max-width: 900px){
-  .heroHeader__inner{
-    flex-direction: column;
-  }
-  .talk{
-    grid-template-columns: 1fr;
-  }
-  .codeGrid{
-    grid-template-columns: 1fr;
-  }
-}
-  /* ===== レベルアップ演出 ===== */
-.levelUp{
-  margin: 6px 0 2px;
-  font-size: 20px;
-  font-weight: 900;
-  color: #1f7ae0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  opacity: 0;
-  transform: scale(0.8);
-  animation: levelUpPop 0.6s ease-out forwards;
-}
-
-.levelUp .arrow{
-  opacity: 0.7;
-}
-
-@keyframes levelUpPop{
-  0%{
-    opacity: 0;
-    transform: scale(0.7);
-  }
-  60%{
-    opacity: 1;
-    transform: scale(1.1);
-  }
-  100%{
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 /* ===== 正解＆レベルアップ ポップアップ ===== */
 .popup{
   position: fixed;
@@ -493,9 +332,7 @@ e{
   z-index: 999;
 }
 
-.popup.hidden{
-  display: none;
-}
+.popup.hidden{ display: none; }
 
 .popup__card{
   background: linear-gradient(135deg, #1f7ae0, #24b3c9);
@@ -505,7 +342,6 @@ e{
   text-align: center;
   min-width: 260px;
   box-shadow: 0 20px 40px rgba(0,0,0,.25);
-
   animation: popupInOut 2s ease forwards;
 }
 
@@ -524,21 +360,15 @@ e{
 }
 
 @keyframes popupInOut{
-  0%{
-    opacity: 0;
-    transform: scale(.7);
-  }
-  15%{
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  85%{
-    opacity: 1;
-    transform: scale(1);
-  }
-  100%{
-    opacity: 0;
-    transform: scale(.7);
-  }
+  0%{ opacity: 0; transform: scale(.7); }
+  15%{ opacity: 1; transform: scale(1.05); }
+  85%{ opacity: 1; transform: scale(1); }
+  100%{ opacity: 0; transform: scale(.7); }
 }
 
+/* ===== レスポンシブ ===== */
+@media (max-width: 900px){
+  .heroHeader__inner{ flex-direction: column; }
+  .talk{ grid-template-columns: 1fr; }
+  .codeGrid{ grid-template-columns: 1fr; }
+}
