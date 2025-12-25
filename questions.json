@@ -16,7 +16,7 @@
     ],
     "answerIndex": 0,
     "levelAward": 2,
-    "explain": ""
+    "explain": "解説はここに表示する"
   },
     {
     "id": "Q02",
@@ -39,4 +39,5 @@
   }
 
 ]
+
 
