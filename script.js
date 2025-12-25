@@ -41,19 +41,15 @@ const el = {
 
 /* ===== 状態 ===== */
 let questions = [];
-let state = {
-  index: 0,
-  level: 1
-};
+let state = { index: 0, level: 1 };
 
 /* ===== Pyodide ===== */
 let pyodideReady = null;
 
 async function runPython(code){
-  if(!pyodideReady){
-    pyodideReady = loadPyodide();
-  }
+  if(!pyodideReady) pyodideReady = loadPyodide();
   const py = await pyodideReady;
+
   try{
     py.runPython(`
 import sys
@@ -92,7 +88,7 @@ function renderQuestion(){
   el.runOutput.textContent = "";
 
   el.choicesForm.innerHTML = "";
-  q.choices.forEach((c, i) => {
+  (q.choices || []).forEach((c, i) => {
     const label = document.createElement("label");
     label.className = "choice";
     label.innerHTML = `
@@ -104,6 +100,22 @@ function renderQuestion(){
 
   el.resultBox.classList.add("hidden");
   el.backBtn.disabled = (state.index === 0);
+}
+
+/* ===== ポップアップ（2秒） ===== */
+let popupTimer = null;
+
+function showPopup({ title, before = "", after = "" }){
+  el.popupResult.textContent = title;
+  el.popupBefore.textContent = before;
+  el.popupAfter.textContent = after;
+
+  el.popup.classList.remove("hidden");
+
+  if(popupTimer) clearTimeout(popupTimer);
+  popupTimer = setTimeout(() => {
+    el.popup.classList.add("hidden");
+  }, POPUP_MS);
 }
 
 /* ===== 判定 ===== */
@@ -120,43 +132,33 @@ function judge(){
   el.explainText.textContent = q.explain || "";
   el.autoNextText.textContent = "";
 
-  /* ===== ポップアップ共通初期化 ===== */
-  el.popup.classList.remove("hidden");
-  el.popupBefore.textContent = "";
-  el.popupAfter.textContent = "";
-
   if(ok){
-    /* 正解処理 */
     const add = Number(q.levelAward) || 1;
     state.level += add;
-
     el.levelText.textContent = `Lv.${state.level}`;
 
-    el.popupResult.textContent = "正解！";
-    el.popupBefore.textContent = `Lv.${beforeLv}`;
-    el.popupAfter.textContent  = `Lv.${state.level}`;
+    showPopup({
+      title: "正解！",
+      before: `Lv.${beforeLv}`,
+      after: `Lv.${state.level}`
+    });
 
-    /* 次の問題へ */
     if(state.index < questions.length - 1){
+      el.autoNextText.textContent = "次の問題へ進みます…";
       setTimeout(() => {
         state.index++;
         renderQuestion();
       }, AUTO_NEXT_MS);
     }
   }else{
-    /* 不正解処理 */
-    el.popupResult.textContent = "残念…";
+    // 不正解：Lv表示は空でOK
+    showPopup({ title: "残念…" });
   }
-
-  /* ===== 2秒後にポップアップを消す ===== */
-  setTimeout(() => {
-    el.popup.classList.add("hidden");
-  }, POPUP_MS);
 }
 
 /* ===== 初期化 ===== */
 async function init(){
-  const res = await fetch(DATA_URL);
+  const res = await fetch(DATA_URL, { cache: "no-store" });
   questions = await res.json();
 
   renderQuestion();
