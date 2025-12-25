@@ -54,7 +54,7 @@
 
     <div class="codeGrid">
       <div class="codeBox">
-        <div class="codeBox__title">Pythonコード（編集できます）</div>
+        <div class="codeBox__title">Pythonコード（編集可）</div>
         <textarea id="pythonEditor" class="code" spellcheck="false"></textarea>
 
         <button id="runBtn" class="btn" type="button" style="margin:10px;">▶ 実行</button>
@@ -71,13 +71,13 @@
 
     <div style="display:flex; gap:10px; margin-top:10px;">
       <button id="backBtn" class="btn" type="button">← 前のステージに戻る</button>
-      <button id="checkBtn" class="btn btn--primary" type="button" disabled>判定する</button>
+      <button id="checkBtn" class="btn btn--primary" type="button">判定する</button>
     </div>
 
-    <div id="resultBox" class="result" hidden>
+    <div id="resultBox" class="result hidden">
       <p id="resultMsg" class="result__msg"></p>
 
-      <!-- ★ レベルアップ演出 -->
+      <!-- ★ レベルアップ演出DOM -->
       <div id="levelUpAnim" class="levelUp hidden">
         <span id="levelBefore"></span>
         <span class="arrow">→</span>
@@ -92,8 +92,7 @@
 
 </main>
 
-<!-- Pyodide -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
-<script src="script.js?v=1"></script>
+<script src="script.js?v=FINAL"></script>
 </body>
 </html>
