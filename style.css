@@ -36,6 +36,7 @@ body.stage-default{
 }
 
 body.stage-tutorial{
+e{
   background:
     radial-gradient(1200px 600px at 10% 0%, rgba(60, 180, 75, .14), transparent 60%),
     radial-gradient(900px 500px at 90% 10%, rgba(31,122,224,.10), transparent 55%),
@@ -152,12 +153,21 @@ body.stage-tutorial{
   justify-content: space-between;
 }
 
-.title{
-  margin: 6px 0 0;
-  font-size: 24px;
+/* 並び順を逆に（ステージ名を上に） */
+.heroHeader__inner > div:first-child{
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
 }
 
-/* ステージ名（14px） */
+/* タイトル（小） */
+.title{
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* ===== ステージ名バッジ ===== */
 .badge{
   display:inline-block;
   padding: 6px 10px;
@@ -165,7 +175,15 @@ body.stage-tutorial{
   background: rgba(255,255,255,.20);
   border: 1px solid rgba(255,255,255,.35);
   font-weight: 700;
-  font-size: 14px; /* ← 指定通り */
+  font-size: 14px;
+}
+
+/* ステージ名だけ大きく */
+.badge.stageBadge{
+  font-size: 22px;
+  padding: 8px 14px;
+  font-weight: 900;
+  border-radius: 14px;
 }
 
 /* ===== ステータス ===== */
@@ -260,7 +278,6 @@ body.stage-tutorial{
   max-height: 180px;
 }
 
-/* 長老のことば（12px） */
 .talk__text{
   margin:0;
   white-space: pre-wrap;
@@ -270,7 +287,7 @@ body.stage-tutorial{
   border-radius: 12px;
   padding: 10px;
   min-height: 180px;
-  font-size: 12px; /* ← 指定通り */
+  font-size: 12px;
 }
 
 /* ===== 問題 ===== */
@@ -314,6 +331,28 @@ body.stage-tutorial{
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
     "Source Han Code JP", monospace;
   font-size: 13px;
+}
+
+/* ===== Pythonコード編集欄 ===== */
+#pythonEditor{
+  width: calc(100% - 20px);
+  margin: 0 10px 10px;
+  padding: 10px;
+  background: transparent;
+  color: #e7eefc;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Source Han Code JP", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 180px;
+  outline: none;
+}
+
+#pythonEditor::selection{
+  background: rgba(255,255,255,.18);
 }
 
 /* ===== 選択肢 ===== */
@@ -375,50 +414,4 @@ body.stage-tutorial{
   .codeGrid{
     grid-template-columns: 1fr;
   }
-}
-/* ===== Pythonコード編集欄（textarea）をコード表示と同じ見た目にする ===== */
-#pythonEditor{
-  width: calc(100% - 20px);
-  margin: 0 10px 10px;
-  padding: 10px;
-
-  background: transparent;       /* codeBox の暗い背景に合わせる */
-  color: #e7eefc;                /* 文字色（pre.code と同系統） */
-
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px;
-
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Source Han Code JP", monospace;
-  font-size: 13px;
-  line-height: 1.6;
-
-  resize: vertical;
-  min-height: 180px;
-  outline: none;
-}
-
-/* ついでに：選択した文字が見やすいように */
-#pythonEditor::selection{
-  background: rgba(255,255,255,.18);
-}
-/* ===== ヘッダ内の並びを逆にする ===== */
-.heroHeader__inner > div:first-child{
-  display: flex;
-  flex-direction: column-reverse; /* ← 順番を逆に */
-  gap: 6px;
-}
-
-/* ===== フォントサイズを逆にする ===== */
-/* ステージ名（小→大） */
-.stageBadge{
-  font-size: 22px;     /* もともと14px → 大きく */
-  padding: 8px 14px;
-  font-weight: 900;
-}
-
-/* タイトル（大→小） */
-.title{
-  font-size: 16px;     /* もともと24px → 小さく */
-  font-weight: 700;
-  margin: 0;
 }
