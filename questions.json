@@ -2,88 +2,77 @@
   {
     "id": "01-range1",
     "stageName": "チュートリアルの平原1",
-    "preTalk": "おお……ついに目を覚ましたか、若き勇者よ。\nだが、まだ慌てるでない。力なき勇者は、スライムにも勝てぬ。まずは「チュートリアルの草原」へ向かうのじゃ。そして、rangeという不思議な力を使いこなすのじゃ。変数ｉを操り、繰り返しの流れを制する者だけが、この平原を越えられるのじゃ。\n1から10までを刻む風のように……必要な範囲を見極め、無駄な力を使わず進むのだ。さすれば、岩は裂け、道は開けるであろう。さあ、冒険の幕開けじゃ……！\n「おぉ、忘れておったわ。共通テストでは右側のような共通テスト言語が使われるが、rangeのように複数の種類がないので楽ちんじゃぞ。」",
+    "preTalk": "まずはrange(★)の形じゃ。★に入る数を考えるのじゃ。",
     "preImage": "images/scene01.JPG",
-    "prompt": "次のコードの表示結果が0,1,2,3となるために★に入る値を選らべ（ｉは変数）\nrangeは指定した範囲の値を取り出す特徴がある。",
+    "prompt": "次のコードの表示結果が 0,1,2,3 となるように、★に入る値を入力しなさい。",
     "pythonCode": "for i in range(★):\n    print(i)",
     "refCode": "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:\n    表示する(i)",
-    "choices": [
-      "0",
-      "1",
-      "4",
-      "5"
+
+    "mode": "input",
+    "blanks": [
+      { "label": "★（1つ目）", "type": "int", "placeholder": "例：4", "hint": "range(n) は 0 から n-1 まで表示されます。" }
     ],
-    "answerIndex": 3,
+    "answers": [4],
+
     "levelAward": 1,
-    "explain": "rangeの中に一つの値を入れると、0から★-1まで表示される"
+    "explain": "range(n) は 0 から n-1 までの整数を取り出します。"
   },
   {
-    "id": "02-range2",
+    "id": "02-range3",
     "stageName": "チュートリアルの平原2",
-    "preTalk": "range(5)だと、0から4まで表示されることは分かったな。\nrangeには他の表現方法もあるのじゃ。今回は２つ目の表現方法を知るのじゃ。\n★に入る２つの値が何か考え、表示する範囲を決めるのじゃ。",
+    "preTalk": "次はrange(★,★,★)じゃ。3つの値で、開始・終了・増え方を決めるのじゃ。",
     "preImage": "images/scene02.JPG",
-    "prompt": "次のコードの表示結果が0,1,2,3となるために★に入る値を選らべ",
-    "pythonCode": "for i in range(★,★):\n    print(i)",
-    "refCode": "i を 1 から 3 まで 1 ずつ増やしながら繰り返す:\n    表示する(i)",
-    "choices": [
-      "0,3",
-      "0,4",
-      "1,3",
-      "1,4"
-    ],
-    "answerIndex": 3,
-    "levelAward": 2,
-    "explain": ""
-  },
-  {
-    "id": "03-range3",
-    "stageName": "チュートリアルの平原3",
-    "preTalk": "range(5), range(1,5)それぞれの使い方の違いは理解できたかな。\n最初の数字が始まり、2つ目の数字がその数字の一つ手前までを表すのじゃ。\nさて、今回は３つ目の表現方法をマスターするのじゃ。\n★に入る３つの値が何か考え、表示する範囲を決めるのじゃ。加算する間隔を指定できるぞ。",
-    "preImage": "images/scene03.JPG",
-    "prompt": "次のコードの表示結果が1,3,5,7となるために★に入る値を選らべ",
+    "prompt": "次のコードの表示結果が 1,3,5,7 となるように、★に入る3つの値を入力しなさい。",
     "pythonCode": "for i in range(★,★,★):\n    print(i)",
     "refCode": "i を 1 から 7 まで 2 ずつ増やしながら繰り返す:\n    表示する(i)",
-    "choices": [
-      "1,7,1",
-      "1,8,1",
-      "1,7,2",
-      "1,8,2"
+
+    "mode": "input",
+    "blanks": [
+      { "label": "開始（1つ目）", "type": "int", "placeholder": "例：1" },
+      { "label": "終了（2つ目）", "type": "int", "placeholder": "例：8", "hint": "終了の値は「その手前まで」です。" },
+      { "label": "増分（3つ目）", "type": "int", "placeholder": "例：2" }
     ],
-    "answerIndex": 3,
-    "levelAward": 3,
-    "explain": ""
+    "answers": [1, 8, 2],
+
+    "levelAward": 2,
+    "explain": "range(a,b,c) は a から始まり、b の手前まで、c ずつ増えます。"
   },
   {
-    "id": "04-range4",
-    "stageName": "チュートリアルの平原4",
-    "preTalk": "range(5), range(1,5), range(1,8,2)と色々なrangeが出てきたのう。\nおや、気づいたようじゃな。range(5)とrange(0,5), range(0,5,1)は同じ結果になるのじゃ。\nさて、今回が最後のrangeじゃ。\n★に入る３つの値を考え、今度は減算で表示する範囲を決めるのじゃ。",
-    "preImage": "images/scene04.JPG",
-    "prompt": "次のコードの表示結果が5,3,1,-1となるために★に入る値を選らべ",
-    "pythonCode": "for i in range(★,★,★):\n    print(i)",
-    "refCode": "i を 5 から -1 まで 2 ずつ減らしながら繰り返す:\n    表示する(i)",
-    "choices": [
-      "-1,-2,5",
-      "-1,5,-2",
-      "5,-2,-2",
-      "5,-1,-2"
-    ],
-    "answerIndex": 2,
-    "levelAward": 3,
-    "explain": ""
-  },
-  {
-    "id": "05-順次構造",
+    "id": "03-operator",
     "stageName": "チュートリアルの岩場1",
-    "preTalk": "おお……再び会えたな、若き勇者よ。\nチュートリアルの草原を越え、よくぞここまで辿り着いた。\n次なる試練は「チュートリアルの岩場」。\nここでは、プログラムの基本となる“順次構造”を学ぶのじゃ。\nコードは上から下へ、順番に実行される。それを意識して見てみるのじゃ。",
-    "preImage": "images/scene05.JPG",
-    "prompt": "次のコードの出力結果を確認しなさい。コードは必ず上から下に読むことが重要です。",
-    "pythonCode": "a = 3\nb = 5\nc = a + b\nprint(c)",
-    "refCode": "a = 3\nb = 5\nc = a + b\n表示する(c)",
+    "preTalk": "数値だけでなく、記号も入力できるようになると強いぞ。",
+    "preImage": "images/scene03.JPG",
+    "prompt": "次の★に入る比較演算子を入力しなさい。（a と b が等しいかを判定）",
+    "pythonCode": "if a ★ b:\n    print(\"OK\")",
+    "refCode": "もし a ★ b ならば:\n    表示する(\"OK\")",
+
+    "mode": "input",
+    "blanks": [
+      { "label": "比較演算子", "type": "text", "placeholder": "例：==" , "hint": "等しいかどうかを比べる記号です。" }
+    ],
+    "answers": ["=="],
+
+    "levelAward": 2,
+    "explain": "等しいかを比べる演算子は == です。= は代入です。"
+  },
+  {
+    "id": "04-choice-sample",
+    "stageName": "チュートリアルの岩場2",
+    "preTalk": "選択式も残せるぞ。入力式と使い分けるのじゃ。",
+    "preImage": "",
+    "prompt": "次のコードの表示結果はどれか。",
+    "pythonCode": "for i in range(3):\n    print(i)",
+    "refCode": "i を 0 から 2 まで 1 ずつ増やしながら繰り返す:\n    表示する(i)",
+
+    "mode": "choice",
     "choices": [
-      "確認した"
+      "0,1,2",
+      "1,2,3",
+      "0,1,2,3"
     ],
     "answerIndex": 0,
+
     "levelAward": 1,
-    "explain": ""
+    "explain": "range(3) は 0,1,2 の3つが取り出されます。"
   }
 ]
