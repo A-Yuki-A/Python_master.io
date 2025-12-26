@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>勇者のPython修行｜チュートリアル</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>勇者のPython修行｜ゲーム</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body class="stage-tutorial">
@@ -33,71 +33,78 @@
 
 <main class="container">
 
-<section class="card">
-  <div class="card__head">
-    <!-- ★ 変更：長老のことば → ストーリー -->
-    <h2 class="card__title">ストーリー</h2>
-  </div>
-  <div class="card__body talk">
-    <img id="talkImage" class="talk__img" alt="">
-    <pre id="talkText" class="talk__text"></pre>
-  </div>
-</section>
+  <section class="card">
+    <div class="card__head">
+      <h2 class="card__title">ストーリー</h2>
+    </div>
+    <div class="card__body talk">
+      <img id="talkImage" class="talk__img" alt="">
+      <pre id="talkText" class="talk__text"></pre>
+    </div>
+  </section>
 
-<section class="card">
-  <div class="card__head">
-    <h2 class="card__title">問題</h2>
-    <div class="pill" id="qidPill">Q-</div>
-  </div>
+  <section class="card">
+    <div class="card__head">
+      <h2 class="card__title">問題</h2>
+      <div class="pill" id="qidPill">Q-</div>
+    </div>
 
-  <div class="card__body">
-    <p id="promptText" class="prompt"></p>
+    <div class="card__body">
+      <p id="promptText" class="prompt"></p>
 
-    <div class="codeGrid">
-      <div class="codeBox">
-        <div class="codeBox__title">Pythonコード（編集可）</div>
-        <textarea id="pythonEditor" class="code" spellcheck="false"></textarea>
+      <div class="codeGrid">
+        <div class="codeBox">
+          <div class="codeBox__title">Pythonコード（編集可）</div>
+          <textarea id="pythonEditor" class="code" spellcheck="false"></textarea>
 
-        <button id="runBtn" class="btn" type="button" style="margin:10px;">▶ 実行</button>
-        <pre id="runOutput" class="code" style="margin:0 10px 10px;"></pre>
+          <div class="runRow">
+            <button id="runBtn" class="btn" type="button">▶ 実行</button>
+          </div>
+
+          <pre id="runOutput" class="code runOutput"></pre>
+        </div>
+
+        <div class="codeBox">
+          <div class="codeBox__title">共通テスト用言語</div>
+          <pre id="refCode" class="code"></pre>
+        </div>
       </div>
 
-      <div class="codeBox">
-        <div class="codeBox__title">共通テスト用言語</div>
-        <pre id="refCode" class="code"></pre>
+      <!-- ★ 入力モード（input）用 -->
+      <div id="inputArea" class="inputs hidden"></div>
+
+      <!-- ★ 選択肢モード（choice）用 -->
+      <form id="choicesForm" class="choices__form hidden"></form>
+
+      <div class="btnRow">
+        <button id="backBtn" class="btn" type="button">← 前のステージに戻る</button>
+        <button id="checkBtn" class="btn btn--primary" type="button">判定する</button>
+      </div>
+
+      <div id="resultBox" class="result hidden">
+        <p id="resultMsg" class="result__msg"></p>
+        <p id="explainText" class="result__explain"></p>
+        <p id="autoNextText" class="autoNext"></p>
       </div>
     </div>
+  </section>
 
-    <form id="choicesForm" class="choices__form"></form>
-
-    <div style="display:flex; gap:10px; margin-top:10px;">
-      <button id="backBtn" class="btn" type="button">← 前のステージに戻る</button>
-      <button id="checkBtn" class="btn btn--primary" type="button">判定する</button>
-    </div>
-
-    <div id="resultBox" class="result hidden">
-      <p id="resultMsg" class="result__msg"></p>
-      <p id="explainText" class="result__explain"></p>
-      <p id="autoNextText" class="autoNext"></p>
-    </div>
-  </div>
-</section>
-
-<!-- ★ 正解＆レベルアップ ポップアップ -->
-<div id="popup" class="popup hidden">
-  <div class="popup__card">
-    <div id="popupResult" class="popup__result">正解！</div>
-    <div class="popup__level">
-      <span id="popupBefore">Lv.1</span>
-      <span class="arrow">→</span>
-      <span id="popupAfter">Lv.2</span>
+  <!-- ★ 正解／不正解 ポップアップ -->
+  <div id="popup" class="popup hidden" aria-hidden="true">
+    <div class="popup__card">
+      <div id="popupResult" class="popup__result">正解！</div>
+      <div id="popupLevelRow" class="popup__level">
+        <span id="popupBefore">Lv.1</span>
+        <span class="arrow">→</span>
+        <span id="popupAfter">Lv.2</span>
+      </div>
     </div>
   </div>
-</div>
 
 </main>
 
+<!-- Pyodide（GitHub PagesでPython実行） -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
-<script src="script.js?v=FIX13"></script>
+<script src="script.js?v=INPUT-TEMPLATE"></script>
 </body>
 </html>
