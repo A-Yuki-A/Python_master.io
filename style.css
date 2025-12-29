@@ -380,3 +380,13 @@ body.stage-tutorial{
   .codeGrid{ grid-template-columns:1fr; }
   .inputRow{ grid-template-columns:1fr; }
 }
+/* スキップボタン（控えめ） */
+.btn--ghost{
+  background:#f5f7fb;
+  color:#5b6578;
+  border:1px dashed #cfd6ea;
+}
+
+.btn--ghost:hover{
+  background:#eef2fb;
+}
