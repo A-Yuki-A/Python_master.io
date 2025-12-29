@@ -32,7 +32,24 @@
   },
   {
     "id": "03-range3",
-    "stageName": "チュートリアルの平原2",
+    "stageName": "チュートリアルの平原3",
+    "preTalk": "今、そなたの前に現れたこの呪文――これは、「飛び越える力」を持つ特別な呪文じゃ。\nよいか、落ち着いて聞くのじゃ。この呪文には、3つの意味が隠されておる。始まりの値と終わり手前の値、飛び越える値じゃ。色々なコードを試してみるがよい",
+    "preImage": "images/scene03.JPG",
+    "prompt": "次のコードの表示結果が 1,3,5,7 となるように、★に入る3つの値を入力するのじゃ。",
+    "pythonCode": "for i in range(★1,★2,★3):\n    print(i)",
+    "refCode": "i を 1 から 7 まで 2 ずつ増やしながら繰り返す:\n    表示する(i)",
+    "mode": "input",
+    "blanks": [
+      { "label": "★1に入るコード", "type": "int", "placeholder": "例：1" },
+      { "label": "★2に入るコード", "type": "int", "placeholder": "例：2" },
+      { "label": "★3に入るコード", "type": "int", "placeholder": "例：3" }
+    ],
+    "answers": [1, 8, 2],
+    "levelAward": 2
+  },
+ {
+    "id": "03-range4",
+    "stageName": "チュートリアルの平原4",
     "preTalk": "次はrange(★,★,★)じゃ。3つの値で、開始・終了・増え方を決めるのじゃ。",
     "preImage": "images/scene02.JPG",
     "prompt": "次のコードの表示結果が 1,3,5,7 となるように、★に入る3つの値を入力するのじゃ。",
@@ -47,6 +64,6 @@
     "answers": [1, 8, 2],
     "levelAward": 2
   }
- 
 ]
+
 
