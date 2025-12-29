@@ -76,8 +76,9 @@
     "blanks": [
       { "label": "出力結果", "type": "int", "placeholder": "例：1" }
     ],
-    "answers": [5],
-    "levelAward": 8
+    "answers": [8],
+    "levelAward": 1
   }
 ]
+
 
