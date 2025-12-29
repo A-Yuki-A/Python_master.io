@@ -91,7 +91,7 @@
     "blanks": [
       { "label": "出力結果", "type": "int", "placeholder": "例：1" }
     ],
-    "answers": [1],
+    "answers": [0],
     "levelAward": 1
   },
        {
@@ -110,6 +110,7 @@
     "levelAward": 1
   }
 ]
+
 
 
 
