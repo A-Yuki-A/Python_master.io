@@ -2,7 +2,7 @@
   {
     "id": "01-range1",
     "stageName": "チュートリアルの平原1",
-    "preTalk": "おお……ついに目を覚ましたか、若き勇者よ。\nだが、まだ慌てるでない。力なき勇者は、スライムにも勝てぬ。まずは「チュートリアルの草原」へ向かうのじゃ。\nそして、rangeという不思議な力を使いこなすのじゃ。変数ｉを操り、繰り返しの流れを制する者だけが、この平原を越えられるのじゃ。1から10までを刻む風のように……。さすれば、岩は裂け、道は開けるであろう。さぁ、冒険の幕開けじゃ……！",
+    "preTalk": "おお……ついに目を覚ましたか、若き勇者よ。\nだが、まだ慌てるでない。力なき勇者は、スライムにも勝てぬ。まずは「チュートリアルの草原」へ向かうのじゃ。\nそして、rangeという不思議な呪文を使いこなすのじゃ。変数ｉを操り、繰り返しの流れを制する者だけが、この平原を越えられるのじゃ。1から10までを刻む風のように……。さすれば、岩は裂け、道は開けるであろう。さぁ、冒険の幕開けじゃ……！",
     "preImage": "images/scene01.JPG",
     "prompt": "次のコードの表示結果が 0,1,2,3 となるように、★に入る値を入力するのじゃ。",
     "pythonCode": "for i in range(★):\n    print(i)",
@@ -15,54 +15,38 @@
     "levelAward": 1
   },
   {
-    "id": "02-range3",
+    "id": "02-range2",
+    "stageName": "チュートリアルの平原2",
+    "preTalk": "おお……若き勇者よ、まずは第一関門クリアじゃな。\n先ほど学んだ range(★) の力、確かに身についたようじゃな。あれは「0から始まり、★の手前まで」を刻む呪文であった。だが、修行はまだ終わらぬ。次は２種類目のrange呪文 ——これは一段上の中級呪文じゃ。",
+    "preImage": "images/scene02.JPG",
+    "prompt": "次のコードの表示結果が 2,3,4,5,6 となるように、★に入る2つの値を入力するのじゃ。",
+    "pythonCode": "for i in range(★1,★2):\n    print(i)",
+    "refCode": "i を 2 から 6 まで 1 ずつ増やしながら繰り返す:\n    表示する(i)",
+    "mode": "input",
+    "blanks": [
+      { "label": "★1に入るコード", "type": "int", "placeholder": "例：1" },
+      { "label": "★2に入るコード", "type": "int", "placeholder": "例：2" }
+    ],
+    "answers": [2, 7],
+    "levelAward": 2
+  },
+  {
+    "id": "03-range3",
     "stageName": "チュートリアルの平原2",
     "preTalk": "次はrange(★,★,★)じゃ。3つの値で、開始・終了・増え方を決めるのじゃ。",
     "preImage": "images/scene02.JPG",
-    "prompt": "次のコードの表示結果が 1,3,5,7 となるように、★に入る3つの値を入力しなさい。",
+    "prompt": "次のコードの表示結果が 1,3,5,7 となるように、★に入る3つの値を入力するのじゃ。",
     "pythonCode": "for i in range(★1,★2,★3):\n    print(i)",
     "refCode": "i を 1 から 7 まで 2 ずつ増やしながら繰り返す:\n    表示する(i)",
     "mode": "input",
     "blanks": [
-      { "label": "★1", "type": "int", "placeholder": "例：1" },
-      { "label": "★2", "type": "int", "placeholder": "例：8" },
-      { "label": "★3", "type": "int", "placeholder": "例：2" }
+      { "label": "★1に入るコード", "type": "int", "placeholder": "例：1" },
+      { "label": "★2に入るコード", "type": "int", "placeholder": "例：2" },
+      { "label": "★3に入るコード", "type": "int", "placeholder": "例：3" }
     ],
     "answers": [1, 8, 2],
     "levelAward": 2
-  },
-  {
-    "id": "03-operator",
-    "stageName": "チュートリアルの岩場1",
-    "preTalk": "数値だけでなく、記号も入力できるようになると強いぞ。",
-    "preImage": "images/scene03.JPG",
-    "prompt": "次の★に入る比較演算子を入力しなさい。（a と b が等しいかを判定）",
-    "pythonCode": "if a ★ b:\n    print(\"OK\")",
-    "refCode": "もし a ★ b ならば:\n    表示する(\"OK\")",
-    "mode": "input",
-    "blanks": [
-      { "label": "比較演算子", "type": "text", "placeholder": "例：==", "hint": "等しいかどうかを比べる記号です。" }
-    ],
-    "answers": ["=="],
-    "levelAward": 2,
-    "explain": "等しいかを比べる演算子は == です。= は代入です。"
-  },
-  {
-    "id": "04-choice-sample",
-    "stageName": "チュートリアルの岩場2",
-    "preTalk": "選択式も残せるぞ。入力式と使い分けるのじゃ。",
-    "preImage": "",
-    "prompt": "次のコードの表示結果はどれか。",
-    "pythonCode": "for i in range(3):\n    print(i)",
-    "refCode": "i を 0 から 2 まで 1 ずつ増やしながら繰り返す:\n    表示する(i)",
-    "mode": "choice",
-    "choices": [
-      "0,1,2",
-      "1,2,3",
-      "0,1,2,3"
-    ],
-    "answerIndex": 0,
-    "levelAward": 1,
-    "explain": "range(3) は 0,1,2 の3つが取り出されます。"
   }
+ 
 ]
+
