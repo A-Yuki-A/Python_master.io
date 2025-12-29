@@ -13,7 +13,6 @@
     ],
     "answers": [4],
     "levelAward": 1,
-    "explain": "range(n) は 0 から n-1 まで表示されます。"
   },
   {
     "id": "02-range3",
@@ -25,13 +24,12 @@
     "refCode": "i を 1 から 7 まで 2 ずつ増やしながら繰り返す:\n    表示する(i)",
     "mode": "input",
     "blanks": [
-      { "label": "開始（1つ目）", "type": "int", "placeholder": "例：1" },
-      { "label": "終了（2つ目）", "type": "int", "placeholder": "例：8", "hint": "終了の値は「その手前まで」です。" },
-      { "label": "増分（3つ目）", "type": "int", "placeholder": "例：2" }
+      { "label": "★1", "type": "int", "placeholder": "例：1" },
+      { "label": "★2", "type": "int", "placeholder": "例：8" },
+      { "label": "★3", "type": "int", "placeholder": "例：2" }
     ],
     "answers": [1, 8, 2],
     "levelAward": 2,
-    "explain": "range(a,b,c) は a から始まり、b の手前まで、c ずつ増えます。"
   },
   {
     "id": "03-operator",
@@ -68,6 +66,7 @@
     "explain": "range(3) は 0,1,2 の3つが取り出されます。"
   }
 ]
+
 
 
 
