@@ -130,8 +130,8 @@
     "preTalk": "",
     "preImage": "images/scene09.JPG",
     "prompt": "変数a,ｂを使いaからbを割った値を表示するコードを完成させるのじゃ",
-    "pythonCode": "a = 12\b = 5\print(★)",
-    "refCode": "a = 12\b = 5\表示する(★)",
+    "pythonCode": "a = 12\nb = 5\nprint(★)",
+    "refCode": "a = 12\nb = 5\n表示する(★)",
     "mode": "input",
     "blanks": [
      { "label": "コードを入力", "type": "string", "placeholder": "例：print(a)" }
@@ -140,14 +140,3 @@
     "levelAward": 1
   }
 ]
-
-
-
-
-
-
-
-
-
-
-
