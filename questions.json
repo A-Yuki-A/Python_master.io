@@ -121,7 +121,7 @@
     "blanks": [
      { "label": "コードを入力", "type": "string", "placeholder": "例：print(a)" }
     ],
-    "answers": ["a+b"],
+    "answers": ["a*b"],
     "levelAward": 1
   },
            {
@@ -140,6 +140,7 @@
     "levelAward": 1
   }
 ]
+
 
 
 
