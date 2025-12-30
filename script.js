@@ -3,7 +3,8 @@
 /* ===== 設定 ===== */
 const DATA_URL = "/Python_master.io/questions.json";
 const AUTO_NEXT_MS = 900;
-const POPUP_MS = 2000;
+const POPUP_MS = 2000;        // 正解・不正解
+const POPUP_SKIP_MS = 1000;   // スキップ専用（1秒）
 
 /* ===== DOM ===== */
 const el = {
@@ -33,7 +34,6 @@ const el = {
   resultBox: document.getElementById("resultBox"),
   resultMsg: document.getElementById("resultMsg"),
   explainText: document.getElementById("explainText"),
-  autoNextText: document.getElementById("autoNextText"),
 
   popup: document.getElementById("popup"),
   popupResult: document.getElementById("popupResult"),
@@ -74,12 +74,11 @@ sys.stdout = StringIO()
 
 /* ===== ユーティリティ ===== */
 function normalizeText(s){
-  return String(s ?? "")
-    .replace(/\u3000/g, " ")
-    .trim();
+  return String(s ?? "").trim();
 }
 
-function showPopup({ title, before = "", after = "" }){
+/* ===== ポップアップ ===== */
+function showPopup({ title, before = "", after = "", duration = POPUP_MS }){
   el.popupResult.textContent = title;
 
   if(before && after){
@@ -92,15 +91,10 @@ function showPopup({ title, before = "", after = "" }){
 
   el.popup.classList.remove("hidden");
 
-  const card = el.popup.querySelector(".popup__card");
-  card.style.animation = "none";
-  void card.offsetWidth;
-  card.style.animation = "";
-
   clearTimeout(showPopup._t);
   showPopup._t = setTimeout(() => {
     el.popup.classList.add("hidden");
-  }, POPUP_MS);
+  }, duration);
 }
 
 /* ===== 表示 ===== */
@@ -111,14 +105,11 @@ function renderInput(q){
 
   q.blanks.forEach((b, i) => {
     const row = document.createElement("div");
-    row.className = "inputRow";
 
     const label = document.createElement("div");
-    label.className = "inputLabel";
     label.textContent = b.label || `入力${i+1}`;
 
     const input = document.createElement("input");
-    input.className = "inputBox";
     input.type = "text";
     input.dataset.type = b.type || "text";
     input.placeholder = b.placeholder || "";
@@ -126,13 +117,6 @@ function renderInput(q){
     row.appendChild(label);
     row.appendChild(input);
     el.inputArea.appendChild(row);
-
-    if(b.hint){
-      const hint = document.createElement("div");
-      hint.className = "inputHint";
-      hint.textContent = b.hint;
-      el.inputArea.appendChild(hint);
-    }
   });
 }
 
@@ -143,10 +127,9 @@ function renderChoice(q){
 
   q.choices.forEach((c, i) => {
     const label = document.createElement("label");
-    label.className = "choice";
     label.innerHTML = `
       <input type="radio" name="choice" value="${i}">
-      <div class="choice__text">${c}</div>
+      ${c}
     `;
     el.choicesForm.appendChild(label);
   });
@@ -165,7 +148,7 @@ function renderQuestion(){
   el.talkImage.hidden = !q.preImage;
 
   el.qidPill.textContent = `Q-${q.id}`;
-  el.promptText.innerHTML = q.prompt || "";
+  el.promptText.textContent = q.prompt || "";
 
   el.pythonEditor.value = q.pythonCode || "";
   el.refCode.textContent = q.refCode || "";
@@ -182,27 +165,13 @@ function renderQuestion(){
 }
 
 /* ===== 判定 ===== */
-function judgeChoice(q){
-  const checked = el.choicesForm.querySelector("input[name='choice']:checked");
-  if(!checked) return { ok:false, reason:"未選択" };
-  return { ok: Number(checked.value) === q.answerIndex };
-}
-
 function judgeInput(q){
-  const inputs = el.inputArea.querySelectorAll(".inputBox");
-  if(inputs.length !== q.answers.length){
-    return { ok:false, reason:"不一致" };
-  }
-
+  const inputs = el.inputArea.querySelectorAll("input");
   for(let i=0;i<inputs.length;i++){
-    const type = inputs[i].dataset.type;
     const user = normalizeText(inputs[i].value);
+    if(user === "") return { ok:false, empty:true };
 
-    if(user === ""){
-      return { ok:false, reason:"未入力" };
-    }
-
-    if(type === "int"){
+    if(inputs[i].dataset.type === "int"){
       if(Number(user) !== q.answers[i]) return { ok:false };
     }else{
       if(user !== normalizeText(q.answers[i])) return { ok:false };
@@ -211,10 +180,26 @@ function judgeInput(q){
   return { ok:true };
 }
 
-function applyResult(ok, q, beforeLv){
-  el.resultBox.classList.remove("hidden");
+function judgeChoice(q){
+  const checked = el.choicesForm.querySelector("input:checked");
+  if(!checked) return { ok:false, empty:true };
+  return { ok:Number(checked.value) === q.answerIndex };
+}
 
-  if(ok){
+function judge(){
+  const q = questions[state.index];
+  const beforeLv = state.level;
+
+  const result = (q.mode === "input") ? judgeInput(q) : judgeChoice(q);
+
+  if(result.empty){
+    el.resultBox.classList.remove("hidden");
+    el.resultMsg.textContent = "未入力";
+    el.explainText.textContent = "答えを入力してください。";
+    return;
+  }
+
+  if(result.ok){
     state.level += q.levelAward || 0;
     el.levelText.textContent = `Lv.${state.level}`;
 
@@ -224,57 +209,40 @@ function applyResult(ok, q, beforeLv){
     showPopup({
       title: "正解！",
       before: `Lv.${beforeLv}`,
-      after: `Lv.${state.level}`
+      after: `Lv.${state.level}`,
+      duration: POPUP_MS
     });
 
-    if(state.index < questions.length - 1){
-      setTimeout(() => {
-        state.index++;
-        renderQuestion();
-      }, AUTO_NEXT_MS);
-    }
-  }else{
-    el.resultMsg.textContent = "不正解";
-    el.explainText.textContent = "もう一度考えてみよう。";
-    showPopup({ title: "残念…" });
-  }
-}
-
-function judge(){
-  const q = questions[state.index];
-  const beforeLv = state.level;
-
-  let result;
-  if(q.mode === "input"){
-    result = judgeInput(q);
-  }else{
-    result = judgeChoice(q);
-  }
-
-  if(result.reason === "未入力" || result.reason === "未選択"){
-    el.resultBox.classList.remove("hidden");
-    el.resultMsg.textContent = "未入力";
-    el.explainText.textContent = "答えを入力してください。";
-    return;
-  }
-
-  applyResult(result.ok, q, beforeLv);
-}
-
-/* ===== スキップ ===== */
-function skipQuestion(){
-  showPopup({ title: "スキップ" });
-
-  el.resultBox.classList.remove("hidden");
-  el.resultMsg.textContent = "スキップしました";
-  el.explainText.textContent = "この問題は後で戻って挑戦できます。";
-
-  if(state.index < questions.length - 1){
     setTimeout(() => {
       state.index++;
       renderQuestion();
     }, AUTO_NEXT_MS);
+  }else{
+    el.resultMsg.textContent = "不正解";
+    el.explainText.textContent = "もう一度考えてみよう。";
+
+    showPopup({
+      title: "残念…",
+      duration: POPUP_MS
+    });
   }
+}
+
+/* ===== スキップ ===== */
+function skipQuestion(){
+  el.resultBox.classList.remove("hidden");
+  el.resultMsg.textContent = "スキップしました";
+  el.explainText.textContent = "この問題は後で戻って挑戦できます。";
+
+  showPopup({
+    title: "スキップ",
+    duration: POPUP_SKIP_MS   // ← ここが1秒
+  });
+
+  setTimeout(() => {
+    state.index++;
+    renderQuestion();
+  }, AUTO_NEXT_MS);
 }
 
 /* ===== 初期化 ===== */
