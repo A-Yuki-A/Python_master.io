@@ -158,9 +158,9 @@ body.stage-tutorial{
 /* 下段：画像（左）＋セリフ（右） */
 .talk__row{
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 320px 1fr; /* ★ 左は画像幅、右は残り全部 */
   gap: 12px;
-  align-items: start;     /* ★ 高さを無理に揃えない（重要） */
+  align-items: start;
 }
 
 /* ================================
