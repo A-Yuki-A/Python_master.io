@@ -3,8 +3,8 @@
 /* ===== 設定 ===== */
 const DATA_URL = "/Python_master.io/questions.json";
 const AUTO_NEXT_MS = 900;
-const POPUP_MS = 2000;        // 正解・不正解
-const POPUP_SKIP_MS = 500;   // スキップ専用（0.5秒）
+const POPUP_MS = 2000;
+const POPUP_SKIP_MS = 500;
 
 /* ===== DOM ===== */
 const el = {
@@ -12,17 +12,17 @@ const el = {
   levelText: document.getElementById("levelText"),
   progressText: document.getElementById("progressText"),
 
-  // ★ ストーリー関連
-  storyCaption: document.getElementById("storyCaption"), // 追加
+  // ストーリー
+  storyCaption: document.getElementById("storyCaption"),
   talkImage: document.getElementById("talkImage"),
   talkText: document.getElementById("talkText"),
 
+  // 問題
   qidPill: document.getElementById("qidPill"),
   promptText: document.getElementById("promptText"),
 
   pythonEditor: document.getElementById("pythonEditor"),
   refCode: document.getElementById("refCode"),
-
   runBtn: document.getElementById("runBtn"),
   runOutput: document.getElementById("runOutput"),
 
@@ -42,6 +42,11 @@ const el = {
   popupLevelRow: document.getElementById("popupLevelRow"),
   popupBefore: document.getElementById("popupBefore"),
   popupAfter: document.getElementById("popupAfter"),
+
+  // ★ ステージ選択モーダル
+  stageModal: document.getElementById("stageModal"),
+  stageList: document.getElementById("stageList"),
+  stageCloseBtn: document.getElementById("stageCloseBtn"),
 };
 
 /* ===== 状態 ===== */
@@ -92,8 +97,8 @@ function showPopup({ title, before = "", after = "", duration = POPUP_MS }){
   }
 
   el.popup.classList.remove("hidden");
-
   clearTimeout(showPopup._t);
+
   showPopup._t = setTimeout(() => {
     el.popup.classList.add("hidden");
   }, duration);
@@ -145,7 +150,7 @@ function renderQuestion(){
   el.levelText.textContent = `Lv.${state.level}`;
   el.progressText.textContent = `${state.index + 1}/${questions.length}`;
 
-  /* ===== ★ preCaption（上段1文） ===== */
+  // preCaption
   const cap = (q.preCaption || "").trim();
   if(cap){
     el.storyCaption.textContent = cap;
@@ -155,12 +160,12 @@ function renderQuestion(){
     el.storyCaption.classList.add("hidden");
   }
 
-  /* ===== ストーリー ===== */
+  // ストーリー
   el.talkText.textContent = q.preTalk || "";
   el.talkImage.src = q.preImage || "";
   el.talkImage.hidden = !q.preImage;
 
-  /* ===== 問題 ===== */
+  // 問題
   el.qidPill.textContent = `Q-${q.id}`;
   el.promptText.textContent = q.prompt || "";
 
@@ -203,7 +208,6 @@ function judgeChoice(q){
 function judge(){
   const q = questions[state.index];
   const beforeLv = state.level;
-
   const result = (q.mode === "input") ? judgeInput(q) : judgeChoice(q);
 
   if(result.empty){
@@ -259,6 +263,43 @@ function skipQuestion(){
   }, AUTO_NEXT_MS);
 }
 
+/* ===== ステージ選択 ===== */
+function buildStages(){
+  const map = new Map();
+  questions.forEach((q, i) => {
+    if(!map.has(q.stageName)){
+      map.set(q.stageName, { name: q.stageName, startIndex: i, count: 1 });
+    }else{
+      map.get(q.stageName).count++;
+    }
+  });
+  return Array.from(map.values());
+}
+
+function openStageModal(){
+  el.stageList.innerHTML = "";
+  buildStages().forEach(s => {
+    const item = document.createElement("div");
+    item.className = "stageItem";
+    item.innerHTML = `
+      <div>${s.name}</div>
+      <div class="stageItem__meta">問題数：${s.count}</div>
+    `;
+    item.addEventListener("click", () => {
+      state.index = s.startIndex;
+      renderQuestion();
+      closeStageModal();
+    });
+    el.stageList.appendChild(item);
+  });
+
+  el.stageModal.classList.remove("hidden");
+}
+
+function closeStageModal(){
+  el.stageModal.classList.add("hidden");
+}
+
 /* ===== 初期化 ===== */
 async function init(){
   const res = await fetch(DATA_URL, { cache:"no-store" });
@@ -279,6 +320,13 @@ async function init(){
   el.runBtn.addEventListener("click", async () => {
     el.runOutput.textContent = "実行中...";
     el.runOutput.textContent = await runPython(el.pythonEditor.value);
+  });
+
+  // ★ ステージ選択
+  el.stageBadge.addEventListener("click", openStageModal);
+  el.stageCloseBtn.addEventListener("click", closeStageModal);
+  el.stageModal.addEventListener("click", (e) => {
+    if(e.target === el.stageModal) closeStageModal();
   });
 }
 
