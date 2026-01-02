@@ -166,12 +166,37 @@
     "blanks": [
       { "label": "出力結果", "type": "string", "placeholder": "例：< > <= >= == !=" }
     ],
-    "answers": [">"],
+    "answers": ["!="],
+    "levelAward": 2
+  },
+          {
+      "id": "12-第3章-1",
+    "stageName": "分岐の発展　論理演算子",
+    "preTalk": "勇者：「長老！ 分岐構造は使いこなせるようになりました！」\n長老：「よし、次は“論理演算子”じゃ。」\n勇者：「ろんりえんざんし……？」\n長老：「相手の動きに合わせて、柔軟に攻撃や守備ができるようになる技よ。“敵が強くて、なおかつおぬしのHPが低いときだけ守る”──こうした条件を組み合わせて判断できるようになるのじゃ。」\n勇者：「条件を組み合わせて動きを変える……これができれば、戦いがもっと賢くなるのですね！」\n長老：「うむ。AND、OR、NOT──これらは論理回路でも学んだはずじゃ。複数の条件が必要な場面では、共通テストでもよく登場する。使いこなして、山奥で暴れるキラキラキラーパンサーを討つのじゃ！」",
+    "preImage": "images/scene12.JPG",
+    "prompt": "変数ｘを２または５で割り切れたら「クリア」、そうでなければ「未クリア」と表示するのじゃ",
+    "pythonCode": "x = 10\nif x % 2 == 0 ★ x % 5 == 0:\n    print('クリア')\nelse:\n    print('未クリア')",
+    "refCode": "x = 6\nもし x % 2 == 0 ★ x % 5 == 0 ならば:\n｜ print('クリア')\nそうでなければ:\n⎿ print('未クリア')",
+    "mode": "input",
+    "blanks": [
+      { "label": "出力結果", "type": "string", "placeholder": "例：and or not" }
+    ],
+    "answers": ["or"],
+    "levelAward": 2
+  },
+  {
+      "id": "13-第3章-2",
+    "stageName": "分岐の発展　論理演算子2",
+    "preTalk": "",
+    "preImage": "images/scene13.JPG",
+    "prompt": "7 の倍数 ではない 、もしくは偶数なら「クリア」と表示、そうでなければ「未クリア」と表示するのじゃ",
+    "pythonCode": "z = 14\nif z % 7 != 0 ★ z % 2 == 0:\n    print('クリア')\nelse:\n    print('未クリア')",
+    "refCode": "z = 14\nif z % 7 != 0 or z % 2 == 0:\n    print('クリア')\nelse:\n    print('未クリア')",
+    "mode": "input",
+    "blanks": [
+      { "label": "出力結果", "type": "string", "placeholder": "例：and or not" }
+    ],
+    "answers": ["or"],
     "levelAward": 2
   }
 ]
-
-
-
-
-
