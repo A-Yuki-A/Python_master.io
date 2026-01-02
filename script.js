@@ -4,7 +4,7 @@
 const DATA_URL = "/Python_master.io/questions.json";
 const AUTO_NEXT_MS = 900;
 const POPUP_MS = 2000;        // 正解・不正解
-const POPUP_SKIP_MS = 500;   // スキップ専用（1秒）
+const POPUP_SKIP_MS = 500;   // スキップ専用（0.5秒）
 
 /* ===== DOM ===== */
 const el = {
@@ -12,6 +12,8 @@ const el = {
   levelText: document.getElementById("levelText"),
   progressText: document.getElementById("progressText"),
 
+  // ★ ストーリー関連
+  storyCaption: document.getElementById("storyCaption"), // 追加
   talkImage: document.getElementById("talkImage"),
   talkText: document.getElementById("talkText"),
 
@@ -143,10 +145,22 @@ function renderQuestion(){
   el.levelText.textContent = `Lv.${state.level}`;
   el.progressText.textContent = `${state.index + 1}/${questions.length}`;
 
+  /* ===== ★ preCaption（上段1文） ===== */
+  const cap = (q.preCaption || "").trim();
+  if(cap){
+    el.storyCaption.textContent = cap;
+    el.storyCaption.classList.remove("hidden");
+  }else{
+    el.storyCaption.textContent = "";
+    el.storyCaption.classList.add("hidden");
+  }
+
+  /* ===== ストーリー ===== */
   el.talkText.textContent = q.preTalk || "";
   el.talkImage.src = q.preImage || "";
   el.talkImage.hidden = !q.preImage;
 
+  /* ===== 問題 ===== */
   el.qidPill.textContent = `Q-${q.id}`;
   el.promptText.textContent = q.prompt || "";
 
@@ -236,7 +250,7 @@ function skipQuestion(){
 
   showPopup({
     title: "スキップ",
-    duration: POPUP_SKIP_MS   // ← ここが1秒
+    duration: POPUP_SKIP_MS
   });
 
   setTimeout(() => {
