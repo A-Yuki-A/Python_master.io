@@ -4,7 +4,7 @@
 const DATA_URL = "/Python_master.io/questions.json";
 const AUTO_NEXT_MS = 900;
 const POPUP_MS = 2000;        // 正解・不正解
-const POPUP_SKIP_MS = 1000;   // スキップ専用（1秒）
+const POPUP_SKIP_MS = 800;   // スキップ専用（1秒）
 
 /* ===== DOM ===== */
 const el = {
