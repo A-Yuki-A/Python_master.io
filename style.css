@@ -168,26 +168,29 @@ body.stage-tutorial{
 ================================ */
 .talk__img{
   width: 100%;
-  max-width: 320px;       /* 横幅の上限 */
-  max-height: 240px;      /* 縦が大きくなりすぎない */
-  height: auto;           /* 縦横比を維持 */
+  max-height: 240px;
+  height: auto;
   display: block;
   margin: 0;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: #fff;
-  object-fit: contain;    /* ★ 切り抜かず全体表示 */
+
+  /* ↓ ここを削除 or 無効化 */
+  border: none;
+  border-radius: 0;
+  background: none;
+
+  object-fit: contain;
 }
 
 /* ================================
    セリフ
 ================================ */
 .talk__text{
-  margin: 0;              /* pre のデフォルト余白を消す */
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--card);
+  margin: 0;
+  padding: 0;              /* ← 枠が無いので余白も不要なら0 */
+  border: none;            /* ← 枠を消す */
+  border-radius: 0;
+  background: none;        /* ← 白背景を消す */
+
   font-size: 15px;
   line-height: 1.6;
   white-space: pre-wrap;
