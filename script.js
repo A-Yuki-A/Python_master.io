@@ -283,8 +283,7 @@ function openStageModal(){
     item.className = "stageItem";
     item.innerHTML = `
       <div>${s.name}</div>
-      <div class="stageItem__meta">問題数：${s.count}</div>
-    `;
+          `;
     item.addEventListener("click", () => {
       state.index = s.startIndex;
       renderQuestion();
