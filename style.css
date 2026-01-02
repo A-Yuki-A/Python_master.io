@@ -164,6 +164,8 @@ body.stage-tutorial{
 /* 画像：枠の中で収める */
 .talk__img{
   width:100%;
+  max-width: 320px;   /* ← ここで横幅を制限 */
+  max-height: 240px;  /* ← 縦が大きくなりすぎないように */
   height:auto;
   display:block;
   border-radius:10px;
